@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,57 +13,113 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function FeedScreen() {
   const navigation = useNavigation<NavigationProp>();
 
+  const posts = [
+    {
+      id: '1',
+      name: 'You',
+      handle: '@you',
+      text: 'I am creating a feed for my app, what do you all think?',
+      likes: 0,
+      comments: 0,
+      boosts: 0,
+    },
+    {
+      id: '2',
+      name: 'andres',
+      handle: '@andres',
+      text: 'I am building an AI chatbot but need a product designer.',
+      likes: 12,
+      comments: 3,
+      boosts: 0,
+    },
+    {
+      id: '3',
+      name: 'elena',
+      handle: '@elena_dev',
+      text: 'I just launched my new SaaS product on Product Hunt! Looking for feedback.',
+      location: 'San Francisco, CA',
+      likes: 256,
+      comments: 42,
+      boosts: 1,
+    },
+    {
+      id: '4',
+      name: 'Builder Bro',
+      handle: '@builderbro',
+      text: "I'm working on a cross-platform mobile app for builders and developers to share what they’re working on and get help. The app should feel simple, fast, and community-driven.",
+      location: 'Remote',
+      likes: 18,
+      comments: 9,
+      boosts: 1,
+      saved: true,
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Logo size={40} />
-        </View>
-        <View style={styles.logoRight}>
+        <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('MyProfile')}>
+          <View style={styles.avatarLarge} />
+        </TouchableOpacity>
+        <View style={styles.headerLogo}>
           <Logo size={32} />
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+          <Ionicons name="settings-outline" size={24} color={Colors.text} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Empty State */}
-        <View style={styles.emptyState}>
-          <Ionicons name="search-outline" size={64} color={Colors.textLight} />
-          <Text style={styles.emptyTitle}>No posts yet</Text>
-          <Text style={styles.emptyText}>
-            It looks like there are no posts in your feed right now. Be the first to share what you are working on!
-          </Text>
-          <TouchableOpacity
-            style={styles.createPostButton}
-            onPress={() => navigation.navigate('CreatePost')}
-          >
-            <Text style={styles.createPostText}>Create Post</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Sample Posts */}
-        <View style={styles.post}>
-          <View style={styles.postHeader}>
-            <View style={styles.avatar} />
-            <View style={styles.postUserInfo}>
-              <Text style={styles.postUsername}>andres</Text>
-              <Text style={styles.postHandle}>@andres</Text>
+        {posts.map((post) => (
+          <View key={post.id} style={styles.post}>
+              <View style={styles.postHeader}>
+                <View style={styles.avatar} />
+                <View style={styles.postUserInfo}>
+                  <Text style={styles.postUsername}>{post.name}</Text>
+                  <Text style={styles.postHandle}>{post.handle}</Text>
+                </View>
+              </View>
+            <Text style={styles.postText}>{post.text}</Text>
+            {post.location && (
+              <View style={styles.locationRow}>
+                <Ionicons name="location-outline" size={14} color={Colors.textLight} />
+                <Text style={styles.locationText}>{post.location}</Text>
+              </View>
+            )}
+            <View style={styles.postActions}>
+              <TouchableOpacity style={styles.postAction}>
+                <Ionicons
+                  name="heart-outline"
+                  size={18}
+                  color={post.likes > 0 ? Colors.primary : Colors.textLight}
+                />
+                <Text
+                  style={[
+                    styles.postActionText,
+                    post.likes > 0 && styles.highlightText,
+                  ]}
+                >
+                  {post.likes}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.postAction}>
+                <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
+                <Text style={styles.postActionText}>{post.comments}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.postAction}>
+                <Ionicons name="arrow-up-outline" size={18} color={Colors.textLight} />
+                {post.boosts ? <Text style={styles.postActionText}>{post.boosts}</Text> : null}
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.postAction}>
+                <Ionicons
+                  name={post.saved ? 'bookmark' : 'bookmark-outline'}
+                  size={18}
+                  color={post.saved ? Colors.primary : Colors.textLight}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-          <Text style={styles.postText}>
-            I am building an AI chatbot but need a product designer.
-          </Text>
-          <View style={styles.postActions}>
-            <View style={styles.postAction}>
-              <Ionicons name="heart-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>12</Text>
-            </View>
-            <View style={styles.postAction}>
-              <Ionicons name="chatbubble-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>3</Text>
-            </View>
-            <Ionicons name="arrow-up-outline" size={20} color={Colors.textLight} />
-          </View>
-        </View>
+        ))}
       </ScrollView>
 
       <TouchableOpacity
@@ -83,58 +139,36 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
-  logoContainer: {
+  profileButton: {
     width: 40,
     height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  logoRight: {
-    width: 40,
-    height: 40,
-    alignItems: 'flex-end',
+  avatarLarge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primary,
+  },
+  headerLogo: {
+    flex: 1,
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 16,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginTop: 24,
-    marginBottom: 12,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 32,
-    paddingHorizontal: 32,
-  },
-  createPostButton: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-  },
-  createPostText: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
   },
   post: {
     backgroundColor: Colors.white,
@@ -174,10 +208,21 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 12,
   },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 12,
+  },
+  locationText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 24,
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
   postAction: {
     flexDirection: 'row',
@@ -187,6 +232,9 @@ const styles = StyleSheet.create({
   postActionText: {
     fontSize: 14,
     color: Colors.textLight,
+  },
+  highlightText: {
+    color: Colors.primary,
   },
   fab: {
     position: 'absolute',
