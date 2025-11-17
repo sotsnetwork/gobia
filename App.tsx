@@ -18,7 +18,40 @@ import CreatePostScreen from './src/screens/CreatePostScreen';
 
 // Profile Screens
 import MyProfileScreen from './src/screens/MyProfileScreen';
-import PlaceholderScreen from './src/screens/PlaceholderScreen';
+import {
+  UserProfileScreen,
+  EditProfileScreen,
+  CommunityDetailScreen,
+  CreateCommunityScreen,
+  GroupsScreen,
+  AdvancedSearchScreen,
+  AdvancedUserSearchScreen,
+  MessagesScreen,
+  ChatScreen,
+  PrivacySettingsScreen,
+  NotificationSettingsScreen,
+  ExportUserDataScreen,
+  BlockedUsersScreen,
+  FAQsScreen,
+  ReportIssueScreen,
+  ShareFeedbackScreen,
+  TermsOfServiceScreen,
+  PrivacyPolicyScreen,
+  CommunityGuidelinesScreen,
+  AdminOptionsScreen,
+  ContentModerationScreen,
+  CommunityModerationScreen,
+  SavedPostsScreen,
+  SavedCommentsScreen,
+  SavedSearchesScreen,
+  DraftsScreen,
+  ArchivedPostsScreen,
+  ActivityLogScreen,
+  TrendingTopicsScreen,
+  CollaborationRequestsScreen,
+  CommunityAwardsScreen,
+  CommunityInsightsScreen,
+} from './src/screens/PlaceholderScreens';
 
 // Community Screens
 import CommunitiesScreen from './src/screens/CommunitiesScreen';
@@ -59,155 +92,59 @@ export default function App() {
 
           {/* Profile */}
           <Stack.Screen name="MyProfile" component={MyProfileScreen} />
-          <Stack.Screen 
-            name="UserProfile" 
-            component={(props: any) => <PlaceholderScreen title="User Profile" />} 
-          />
-          <Stack.Screen 
-            name="EditProfile" 
-            component={(props: any) => <PlaceholderScreen title="Edit Profile" />} 
-          />
+          <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
 
           {/* Communities */}
           <Stack.Screen name="Communities" component={CommunitiesScreen} />
-          <Stack.Screen 
-            name="CommunityDetail" 
-            component={(props: any) => <PlaceholderScreen title="Community" />} 
-          />
-          <Stack.Screen 
-            name="CreateCommunity" 
-            component={(props: any) => <PlaceholderScreen title="Create Community" />} 
-          />
-          <Stack.Screen 
-            name="Groups" 
-            component={(props: any) => <PlaceholderScreen title="Groups" />} 
-          />
+          <Stack.Screen name="CommunityDetail" component={CommunityDetailScreen} />
+          <Stack.Screen name="CreateCommunity" component={CreateCommunityScreen} />
+          <Stack.Screen name="Groups" component={GroupsScreen} />
 
           {/* Search */}
           <Stack.Screen name="Search" component={SearchScreen} />
-          <Stack.Screen 
-            name="AdvancedSearch" 
-            component={(props: any) => <PlaceholderScreen title="Advanced Search" />} 
-          />
-          <Stack.Screen 
-            name="AdvancedUserSearch" 
-            component={(props: any) => <PlaceholderScreen title="Advanced User Search" />} 
-          />
+          <Stack.Screen name="AdvancedSearch" component={AdvancedSearchScreen} />
+          <Stack.Screen name="AdvancedUserSearch" component={AdvancedUserSearchScreen} />
 
           {/* Messages */}
-          <Stack.Screen 
-            name="Messages" 
-            component={(props: any) => <PlaceholderScreen title="Messages" />} 
-          />
-          <Stack.Screen 
-            name="Chat" 
-            component={(props: any) => <PlaceholderScreen title="Chat" />} 
-          />
+          <Stack.Screen name="Messages" component={MessagesScreen} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
 
           {/* Settings */}
           <Stack.Screen name="Settings" component={SettingsScreen} />
-          <Stack.Screen 
-            name="PrivacySettings" 
-            component={(props: any) => <PlaceholderScreen title="Privacy Settings" />} 
-          />
-          <Stack.Screen 
-            name="NotificationSettings" 
-            component={(props: any) => <PlaceholderScreen title="Notification Settings" />} 
-          />
-          <Stack.Screen 
-            name="ExportUserData" 
-            component={(props: any) => <PlaceholderScreen title="Export User Data" />} 
-          />
-          <Stack.Screen 
-            name="BlockedUsers" 
-            component={(props: any) => <PlaceholderScreen title="Blocked Users" />} 
-          />
+          <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} />
+          <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+          <Stack.Screen name="ExportUserData" component={ExportUserDataScreen} />
+          <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
 
           {/* Support */}
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-          <Stack.Screen 
-            name="FAQs" 
-            component={(props: any) => <PlaceholderScreen title="FAQs" />} 
-          />
-          <Stack.Screen 
-            name="ReportIssue" 
-            component={(props: any) => <PlaceholderScreen title="Report an Issue" />} 
-          />
-          <Stack.Screen 
-            name="ShareFeedback" 
-            component={(props: any) => <PlaceholderScreen title="Share Your Feedback" />} 
-          />
+          <Stack.Screen name="FAQs" component={FAQsScreen} />
+          <Stack.Screen name="ReportIssue" component={ReportIssueScreen} />
+          <Stack.Screen name="ShareFeedback" component={ShareFeedbackScreen} />
 
           {/* Legal */}
           <Stack.Screen name="AboutUs" component={AboutUsScreen} />
-          <Stack.Screen 
-            name="TermsOfService" 
-            component={(props: any) => <PlaceholderScreen title="Terms of Service" />} 
-          />
-          <Stack.Screen 
-            name="PrivacyPolicy" 
-            component={(props: any) => <PlaceholderScreen title="Privacy Policy" />} 
-          />
-          <Stack.Screen 
-            name="CommunityGuidelines" 
-            component={(props: any) => <PlaceholderScreen title="Community Guidelines" />} 
-          />
+          <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+          <Stack.Screen name="CommunityGuidelines" component={CommunityGuidelinesScreen} />
 
           {/* Admin */}
-          <Stack.Screen 
-            name="AdminOptions" 
-            component={(props: any) => <PlaceholderScreen title="Admin Options" />} 
-          />
-          <Stack.Screen 
-            name="ContentModeration" 
-            component={(props: any) => <PlaceholderScreen title="Content Moderation" />} 
-          />
-          <Stack.Screen 
-            name="CommunityModeration" 
-            component={(props: any) => <PlaceholderScreen title="Community Moderation" />} 
-          />
+          <Stack.Screen name="AdminOptions" component={AdminOptionsScreen} />
+          <Stack.Screen name="ContentModeration" component={ContentModerationScreen} />
+          <Stack.Screen name="CommunityModeration" component={CommunityModerationScreen} />
 
           {/* Other */}
-          <Stack.Screen 
-            name="SavedPosts" 
-            component={(props: any) => <PlaceholderScreen title="Saved Posts" />} 
-          />
-          <Stack.Screen 
-            name="SavedComments" 
-            component={(props: any) => <PlaceholderScreen title="Saved Comments" />} 
-          />
-          <Stack.Screen 
-            name="SavedSearches" 
-            component={(props: any) => <PlaceholderScreen title="Saved Searches" />} 
-          />
-          <Stack.Screen 
-            name="Drafts" 
-            component={(props: any) => <PlaceholderScreen title="Drafts" />} 
-          />
-          <Stack.Screen 
-            name="ArchivedPosts" 
-            component={(props: any) => <PlaceholderScreen title="Archived Posts" />} 
-          />
-          <Stack.Screen 
-            name="ActivityLog" 
-            component={(props: any) => <PlaceholderScreen title="Activity Log" />} 
-          />
-          <Stack.Screen 
-            name="TrendingTopics" 
-            component={(props: any) => <PlaceholderScreen title="Trending Topics" />} 
-          />
-          <Stack.Screen 
-            name="CollaborationRequests" 
-            component={(props: any) => <PlaceholderScreen title="Collaboration Requests" />} 
-          />
-          <Stack.Screen 
-            name="CommunityAwards" 
-            component={(props: any) => <PlaceholderScreen title="Community Awards" />} 
-          />
-          <Stack.Screen 
-            name="CommunityInsights" 
-            component={(props: any) => <PlaceholderScreen title="Community Insights" />} 
-          />
+          <Stack.Screen name="SavedPosts" component={SavedPostsScreen} />
+          <Stack.Screen name="SavedComments" component={SavedCommentsScreen} />
+          <Stack.Screen name="SavedSearches" component={SavedSearchesScreen} />
+          <Stack.Screen name="Drafts" component={DraftsScreen} />
+          <Stack.Screen name="ArchivedPosts" component={ArchivedPostsScreen} />
+          <Stack.Screen name="ActivityLog" component={ActivityLogScreen} />
+          <Stack.Screen name="TrendingTopics" component={TrendingTopicsScreen} />
+          <Stack.Screen name="CollaborationRequests" component={CollaborationRequestsScreen} />
+          <Stack.Screen name="CommunityAwards" component={CommunityAwardsScreen} />
+          <Stack.Screen name="CommunityInsights" component={CommunityInsightsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
