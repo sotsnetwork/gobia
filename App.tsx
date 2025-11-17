@@ -154,7 +154,11 @@ export default function App() {
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
 
             {/* Profile */}
-            <Stack.Screen name="MyProfile" component={MyProfileScreen} />
+              <Stack.Screen
+                name="MyProfile"
+                component={MyProfileScreen}
+                options={{ animation: 'slide_from_left' }}
+              />
             <Stack.Screen name="UserProfile" component={UserProfileScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
 
