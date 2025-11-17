@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import Logo from '../components/Logo';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -16,14 +17,10 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          <View style={styles.logo}>
-            <Text style={styles.logoSymbol}>≥</Text>
-          </View>
+          <Logo size={40} />
         </View>
         <View style={styles.logoRight}>
-          <View style={styles.logoIcon}>
-            <Text style={styles.logoIconText}>∞</Text>
-          </View>
+          <Logo size={32} />
         </View>
       </View>
 
@@ -97,33 +94,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-  logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoSymbol: {
-    color: Colors.white,
-    fontSize: 20,
-  },
   logoRight: {
     width: 40,
     height: 40,
     alignItems: 'flex-end',
-  },
-  logoIcon: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoIconText: {
-    color: Colors.primary,
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   scrollView: {
     flex: 1,
