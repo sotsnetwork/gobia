@@ -21,7 +21,7 @@ export default function Button({
 }: ButtonProps) {
   const buttonStyle = [
     styles.button,
-    styles[variant],
+    variant === 'text' ? styles.textVariant : styles[variant],
     disabled && styles.disabled,
     style,
   ];
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primary,
   },
-  text: {
+  textVariant: {
     backgroundColor: 'transparent',
   },
   disabled: {
