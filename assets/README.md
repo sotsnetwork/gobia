@@ -2,27 +2,20 @@
 
 ## Logo Setup
 
-The app uses the Gobia logo (stylized orange 'g' on black background).
+- The app now uses the Gobia logo stored at `assets/logo.png`.
+- Replace that file with any updated branding (keep the filename).
+- Recommended format: 512x512px PNG with transparent or solid background.
+- The `Logo` component automatically displays this asset across:
+  - Welcome Screen
+  - Login Screen
+  - Sign Up Screen
+  - Feed Screen header
 
-1. **Place your logo file** in this directory (`assets/`) with the name `logo.png`
-   - Supported formats: PNG, JPG, JPEG
-   - Recommended size: 512x512px or larger (square format works best)
-   - The logo will be automatically resized as needed
-   - The Logo component will automatically use it once the file is added
-
-2. **The logo will automatically appear** in:
-   - Welcome Screen
-   - Login Screen
-   - Sign Up Screen
-   - Feed Screen header
-
-3. **To use the logo in other screens**, import and use the Logo component:
-   ```typescript
-   import Logo from '../components/Logo';
-   
-   // Then use it:
-   <Logo size={60} />  // Adjust size as needed
-   ```
+To reuse the logo elsewhere:
+```typescript
+import Logo from '../components/Logo';
+<Logo size={60} />
+```
 
 ## App Icons
 
