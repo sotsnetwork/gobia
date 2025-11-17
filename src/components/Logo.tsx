@@ -8,24 +8,8 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 60, style }: LogoProps) {
-  // For now, show a placeholder until you add your logo
-  // Once you add assets/logo.png, uncomment the Image component below
-  // and remove the placeholder View
-  
-  return (
-    <View
-      style={[
-        styles.placeholder,
-        { width: size, height: size, borderRadius: size * 0.2 },
-        style,
-      ]}
-    >
-      <Text style={[styles.placeholderText, { fontSize: size * 0.4 }]}>≥</Text>
-    </View>
-  );
-
-  // Uncomment this once you add assets/logo.png:
-  /*
+  // Use the Gobia logo (stylized orange 'g' on black background)
+  // Place assets/logo.png in the assets folder to use your actual logo
   return (
     <Image
       source={require('../../assets/logo.png')}
@@ -33,7 +17,6 @@ export default function Logo({ size = 60, style }: LogoProps) {
       resizeMode="contain"
     />
   );
-  */
 }
 
 const styles = StyleSheet.create({
