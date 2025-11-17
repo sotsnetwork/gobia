@@ -6,6 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Input from '../components/Input';
 import Button from '../components/Button';
+import Logo from '../components/Logo';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -25,9 +26,7 @@ export default function LoginScreen() {
       >
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-            <View style={styles.logo}>
-              <Text style={styles.logoSymbol}>≥</Text>
-            </View>
+            <Logo size={60} />
           </View>
 
           <Text style={styles.title}>Log in to your account</Text>
@@ -113,19 +112,6 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginBottom: 40,
-  },
-  logo: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoSymbol: {
-    color: Colors.white,
-    fontSize: 32,
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 28,
