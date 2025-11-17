@@ -2,26 +2,21 @@
 
 ## Logo Setup
 
-The app currently uses a placeholder logo. To add your actual logo:
+The app uses the Gobia logo (stylized orange 'g' on black background).
 
 1. **Place your logo file** in this directory (`assets/`) with the name `logo.png`
    - Supported formats: PNG, JPG, JPEG
    - Recommended size: 512x512px or larger (square format works best)
    - The logo will be automatically resized as needed
+   - The Logo component will automatically use it once the file is added
 
-2. **Update the Logo component** to use your logo:
-   - Open `src/components/Logo.tsx`
-   - Comment out the placeholder View (lines with the "≥" symbol)
-   - Uncomment the Image component section at the bottom
-   - Save the file
-
-3. **The logo will automatically appear** in:
+2. **The logo will automatically appear** in:
    - Welcome Screen
    - Login Screen
    - Sign Up Screen
    - Feed Screen header
 
-4. **To use the logo in other screens**, import and use the Logo component:
+3. **To use the logo in other screens**, import and use the Logo component:
    ```typescript
    import Logo from '../components/Logo';
    
