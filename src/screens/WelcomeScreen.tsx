@@ -17,11 +17,11 @@ export default function WelcomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <Logo size={60} />
+          <Logo size={120} />
         </View>
         
         <Text style={styles.title}>
-          Welcome to{'\n'}Buildspace
+          Gobia
         </Text>
         
         <Text style={styles.subtitle}>
