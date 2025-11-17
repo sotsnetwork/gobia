@@ -71,7 +71,12 @@ export default function FeedScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {posts.map((post) => (
-          <View key={post.id} style={styles.post}>
+          <TouchableOpacity
+            key={post.id}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('PostDetail', { post })}
+          >
+            <View style={styles.post}>
               <View style={styles.postHeader}>
                 <View style={styles.avatar} />
                 <View style={styles.postUserInfo}>
@@ -118,7 +123,8 @@ export default function FeedScreen() {
                 />
               </TouchableOpacity>
             </View>
-          </View>
+            </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
