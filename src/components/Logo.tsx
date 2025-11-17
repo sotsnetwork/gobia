@@ -1,6 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, ImageStyle, ViewStyle, View, Text } from 'react-native';
-import { Colors } from '../constants/colors';
+import { Image, StyleSheet, ImageStyle, ViewStyle } from 'react-native';
 
 interface LogoProps {
   size?: number;
@@ -8,8 +7,7 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 60, style }: LogoProps) {
-  // Use the Gobia logo (stylized orange 'g' on black background)
-  // Place assets/logo.png in the assets folder to use your actual logo
+  // Display the Gobia logo stored at assets/logo.png
   return (
     <Image
       source={require('../../assets/logo.png')}
@@ -22,14 +20,5 @@ export default function Logo({ size = 60, style }: LogoProps) {
 const styles = StyleSheet.create({
   logo: {
     borderRadius: 12,
-  },
-  placeholder: {
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  placeholderText: {
-    color: Colors.white,
-    fontWeight: 'bold',
   },
 });
