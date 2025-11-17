@@ -5,7 +5,6 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import Header from '../components/Header';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -16,53 +15,120 @@ export default function PostDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RoutePropType>();
 
+  const post = route.params?.post ?? {
+    id: 'default',
+    name: 'Sarah Mills',
+    handle: '@sarahm_builds',
+    text: "I'm working on a new cross-platform mobile app for builders and developers to share what they're working on and get help. The goal is to make it feel simple, fast, and community-driven, with a clean, minimalist design.",
+    timestamp: '10:42 AM · Mar 18, 2024',
+    likes: 12,
+    comments: 5,
+    boosts: 3,
+    saved: false,
+  };
+
+  const comments = [
+    {
+      id: 'c1',
+      name: 'Alex Dev',
+      handle: '@alexdev',
+      time: '2h',
+      text: "This sounds amazing! I've been looking for a community like this. Can't wait to see it.",
+    },
+    {
+      id: 'c2',
+      name: 'CodeWizard',
+      handle: '@wizard',
+      time: '1h',
+      text: 'Great initiative! Is this going to be open source? I’d love to contribute.',
+    },
+    {
+      id: 'c3',
+      name: 'JenCoder',
+      handle: '@jencoder',
+      time: '45m',
+      text: 'Count me in for beta testing! The design philosophy sounds perfect.',
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Post" />
+      <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navButton}>
+          <Ionicons name="chevron-back" size={24} color={Colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>Post</Text>
+        <TouchableOpacity style={styles.navButton}>
+          <Ionicons name="ellipsis-horizontal" size={20} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.post}>
           <View style={styles.postHeader}>
             <View style={styles.avatar} />
             <View style={styles.postUserInfo}>
-              <Text style={styles.postUsername}>Sarah Mills</Text>
-              <Text style={styles.postHandle}>@sarahm_builds</Text>
+              <Text style={styles.postUsername}>{post.name}</Text>
+              <Text style={styles.postHandle}>{post.handle}</Text>
             </View>
-            <TouchableOpacity>
-              <Ionicons name="ellipsis-horizontal" size={20} color={Colors.text} />
-            </TouchableOpacity>
           </View>
-          <Text style={styles.postText}>
-            I'm working on a new cross-platform mobile app for builders and developers to share what they're working on and get help. The goal is to make it feel simple, fast, and community-driven, with a clean, minimalist design.
-          </Text>
-          <Text style={styles.timestamp}>10:42 AM · Mar 18, 2024</Text>
+          <Text style={styles.postText}>{post.text}</Text>
+          <Text style={styles.timestamp}>{post.timestamp}</Text>
           <View style={styles.postActions}>
-            <View style={styles.postAction}>
+            <TouchableOpacity style={styles.postAction}>
               <Ionicons name="heart-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>12</Text>
-            </View>
-            <View style={styles.postAction}>
+              <Text style={styles.postActionText}>{post.likes}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.postAction}>
               <Ionicons name="chatbubble-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>5</Text>
-            </View>
-            <Ionicons name="arrow-up-outline" size={20} color={Colors.textLight} />
-            <Ionicons name="bookmark-outline" size={20} color={Colors.textLight} />
+              <Text style={styles.postActionText}>{post.comments}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.postAction}>
+              <Ionicons name="arrow-up-outline" size={20} color={Colors.textLight} />
+              {post.boosts ? <Text style={styles.postActionText}>{post.boosts}</Text> : null}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.postAction}>
+              <Ionicons
+                name={post.saved ? 'bookmark' : 'bookmark-outline'}
+                size={20}
+                color={post.saved ? Colors.primary : Colors.textLight}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.comments}>
-          <View style={styles.comment}>
-            <View style={styles.commentAvatar} />
-            <View style={styles.commentContent}>
-              <Text style={styles.commentName}>Alex Dev</Text>
-              <Text style={styles.commentHandle}>@alexdev · 2h</Text>
-              <Text style={styles.commentText}>
-                This sounds amazing! I've been looking for a community like this. Can't wait to see it.
-              </Text>
-              <TouchableOpacity>
-                <Text style={styles.replyText}>Reply</Text>
-              </TouchableOpacity>
+          {comments.map((comment) => (
+            <View key={comment.id} style={styles.comment}>
+              <View style={styles.commentAvatar} />
+              <View style={styles.commentContent}>
+                <View style={styles.commentHeader}>
+                  <Text style={styles.commentName}>{comment.name}</Text>
+                  <Text style={styles.commentHandle}>
+                    {comment.handle} · {comment.time}
+                  </Text>
+                  <TouchableOpacity>
+                    <Ionicons name="ellipsis-horizontal" size={16} color={Colors.textLight} />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.commentText}>{comment.text}</Text>
+                <TouchableOpacity>
+                  <Text style={styles.replyText}>Reply</Text>
+                </TouchableOpacity>
+                <View style={styles.commentActions}>
+                  <TouchableOpacity style={styles.postAction}>
+                    <Ionicons name="heart-outline" size={16} color={Colors.textLight} />
+                    <Text style={styles.postActionText}>0</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.postAction}>
+                    <Ionicons name="arrow-up-outline" size={16} color={Colors.textLight} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.postAction}>
+                    <Ionicons name="bookmark-outline" size={16} color={Colors.textLight} />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
+          ))}
         </View>
       </ScrollView>
 
@@ -85,6 +151,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  navBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+    backgroundColor: Colors.white,
+  },
+  navButton: {
+    padding: 4,
+  },
+  navTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
   },
   scrollView: {
     flex: 1,
@@ -164,6 +248,11 @@ const styles = StyleSheet.create({
   commentContent: {
     flex: 1,
   },
+  commentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   commentName: {
     fontSize: 16,
     fontWeight: '600',
@@ -184,6 +273,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '500',
+    marginBottom: 8,
+  },
+  commentActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
   replyBar: {
     flexDirection: 'row',
