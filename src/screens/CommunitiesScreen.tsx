@@ -32,6 +32,7 @@ export default function CommunitiesScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
+        <View style={styles.headerLeft} />
         <Text style={styles.headerTitle}>Communities</Text>
         <TouchableOpacity onPress={() => navigation.navigate('CreateCommunity')}>
           <Ionicons name="add" size={24} color={Colors.text} />
@@ -78,10 +79,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
+  headerLeft: {
+    width: 24,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.text,
+    flex: 1,
+    textAlign: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
