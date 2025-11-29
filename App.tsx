@@ -34,7 +34,6 @@ import {
   PrivacySettingsScreen,
   NotificationSettingsScreen,
   ExportUserDataScreen,
-  BlockedUsersScreen,
   FAQsScreen,
   ReportIssueScreen,
   ShareFeedbackScreen,
@@ -64,6 +63,7 @@ import SearchScreen from './src/screens/SearchScreen';
 
 // Settings Screens
 import SettingsScreen from './src/screens/SettingsScreen';
+import BlockedUsersScreen from './src/screens/BlockedUsersScreen';
 
 // Support Screens
 import HelpSupportScreen from './src/screens/HelpSupportScreen';
