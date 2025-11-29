@@ -9,8 +9,9 @@ export type RootStackParamList = {
   MainTabs: undefined;
   
   // Detail Screens
-  PostDetail: { postId: string };
+  PostDetail: { postId?: string; post?: any };
   CreatePost: undefined;
+  QuotePost: { post?: any; reply?: any };
   
   // Profile
   MyProfile: undefined;
