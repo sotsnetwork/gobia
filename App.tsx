@@ -20,6 +20,7 @@ import MainTabNavigator from './src/navigators/MainTabNavigator';
 // Main Screens
 import PostDetailScreen from './src/screens/PostDetailScreen';
 import CreatePostScreen from './src/screens/CreatePostScreen';
+import QuotePostScreen from './src/screens/QuotePostScreen';
 
 // Profile Screens
 import MyProfileScreen from './src/screens/MyProfileScreen';
@@ -154,6 +155,7 @@ export default function App() {
             {/* Detail Screens */}
             <Stack.Screen name="PostDetail" component={PostDetailScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+            <Stack.Screen name="QuotePost" component={QuotePostScreen} />
 
             {/* Profile */}
               <Stack.Screen
