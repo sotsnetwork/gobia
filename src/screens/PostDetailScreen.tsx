@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -23,24 +24,31 @@ export default function PostDetailScreen() {
     timestamp: '10:42 AM · Mar 18, 2024',
     likes: 12,
     comments: 5,
-    boosts: 3,
+    reposts: 3,
     saved: false,
   };
 
-  const comments = [
+  const [replyText, setReplyText] = useState('');
+  const [comments, setComments] = useState([
     {
       id: 'c1',
       name: 'Alex Dev',
       handle: '@alexdev',
       time: '2h',
       text: "This sounds amazing! I've been looking for a community like this. Can't wait to see it.",
+      likes: 5,
+      reposts: 1,
+      saved: false,
     },
     {
       id: 'c2',
       name: 'CodeWizard',
       handle: '@wizard',
       time: '1h',
-      text: 'Great initiative! Is this going to be open source? I’d love to contribute.',
+      text: 'Great initiative! Is this going to be open source? I'd love to contribute.',
+      likes: 8,
+      reposts: 0,
+      saved: false,
     },
     {
       id: 'c3',
@@ -48,8 +56,18 @@ export default function PostDetailScreen() {
       handle: '@jencoder',
       time: '45m',
       text: 'Count me in for beta testing! The design philosophy sounds perfect.',
+      likes: 3,
+      reposts: 0,
+      saved: false,
     },
-  ];
+  ]);
+
+  const handleReplySubmit = () => {
+    if (replyText.trim()) {
+      // In real app, submit reply to backend
+      setReplyText('');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -73,30 +91,22 @@ export default function PostDetailScreen() {
           </View>
           <Text style={styles.postText}>{post.text}</Text>
           <Text style={styles.timestamp}>{post.timestamp}</Text>
-          <View style={styles.postActions}>
-            <TouchableOpacity style={styles.postAction}>
-              <Ionicons name="heart-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>{post.likes}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.postAction}>
-              <Ionicons name="chatbubble-outline" size={20} color={Colors.textLight} />
-              <Text style={styles.postActionText}>{post.comments}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.postAction}>
-              <Ionicons name="arrow-up-outline" size={20} color={Colors.textLight} />
-              {post.boosts ? <Text style={styles.postActionText}>{post.boosts}</Text> : null}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.postAction}>
-              <Ionicons
-                name={post.saved ? 'bookmark' : 'bookmark-outline'}
-                size={20}
-                color={post.saved ? Colors.primary : Colors.textLight}
-              />
-            </TouchableOpacity>
-          </View>
+          <PostActions
+            post={post}
+            onComment={() => {
+              // Focus on reply input
+            }}
+            onRepost={() => {
+              // Handle repost
+            }}
+            onQuote={() => {
+              navigation.navigate('QuotePost', { post });
+            }}
+          />
         </View>
 
         <View style={styles.comments}>
+          <Text style={styles.commentsTitle}>Replies ({comments.length})</Text>
           {comments.map((comment) => (
             <View key={comment.id} style={styles.comment}>
               <View style={styles.commentAvatar} />
@@ -111,21 +121,31 @@ export default function PostDetailScreen() {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.commentText}>{comment.text}</Text>
-                <TouchableOpacity>
+                <TouchableOpacity style={styles.replyButton}>
                   <Text style={styles.replyText}>Reply</Text>
                 </TouchableOpacity>
-                <View style={styles.commentActions}>
-                  <TouchableOpacity style={styles.postAction}>
-                    <Ionicons name="heart-outline" size={16} color={Colors.textLight} />
-                    <Text style={styles.postActionText}>0</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.postAction}>
-                    <Ionicons name="arrow-up-outline" size={16} color={Colors.textLight} />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.postAction}>
-                    <Ionicons name="bookmark-outline" size={16} color={Colors.textLight} />
-                  </TouchableOpacity>
-                </View>
+                <PostActions
+                  post={{
+                    id: comment.id,
+                    name: comment.name,
+                    handle: comment.handle,
+                    text: comment.text,
+                    likes: comment.likes,
+                    comments: 0,
+                    reposts: comment.reposts,
+                    saved: comment.saved,
+                  }}
+                  onComment={() => {
+                    // Handle reply to comment
+                  }}
+                  onRepost={() => {
+                    // Handle repost comment
+                  }}
+                  onQuote={() => {
+                    navigation.navigate('QuotePost', { reply: comment });
+                  }}
+                  compact={true}
+                />
               </View>
             </View>
           ))}
@@ -137,10 +157,21 @@ export default function PostDetailScreen() {
           style={styles.replyInput}
           placeholder="Post your reply"
           placeholderTextColor={Colors.textLight}
+          value={replyText}
+          onChangeText={setReplyText}
+          multiline
         />
-        <Text style={styles.characterCount}>0/280</Text>
-        <TouchableOpacity style={styles.sendButton}>
-          <Ionicons name="send" size={20} color={Colors.white} />
+        <Text style={styles.characterCount}>{replyText.length}/280</Text>
+        <TouchableOpacity
+          style={[styles.sendButton, !replyText.trim() && styles.sendButtonDisabled]}
+          onPress={handleReplySubmit}
+          disabled={!replyText.trim()}
+        >
+          <Ionicons
+            name="send"
+            size={20}
+            color={replyText.trim() ? Colors.white : Colors.textLight}
+          />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -217,26 +248,21 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginBottom: 12,
   },
-  postActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-  postAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  postActionText: {
-    fontSize: 14,
-    color: Colors.textLight,
-  },
   comments: {
     marginTop: 16,
   },
+  commentsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 16,
+  },
   comment: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
   },
   commentAvatar: {
     width: 32,
@@ -252,6 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    marginBottom: 4,
   },
   commentName: {
     fontSize: 16,
@@ -261,7 +288,6 @@ const styles = StyleSheet.create({
   commentHandle: {
     fontSize: 14,
     color: Colors.textLight,
-    marginBottom: 4,
   },
   commentText: {
     fontSize: 16,
@@ -269,20 +295,17 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 8,
   },
+  replyButton: {
+    marginBottom: 8,
+  },
   replyText: {
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '500',
-    marginBottom: 8,
-  },
-  commentActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
   },
   replyBar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: Colors.borderLight,
@@ -297,10 +320,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     color: Colors.text,
+    maxHeight: 100,
   },
   characterCount: {
     fontSize: 12,
     color: Colors.textLight,
+    alignSelf: 'flex-end',
+    marginBottom: 8,
   },
   sendButton: {
     width: 36,
@@ -310,5 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sendButtonDisabled: {
+    backgroundColor: Colors.borderLight,
+  },
 });
-
