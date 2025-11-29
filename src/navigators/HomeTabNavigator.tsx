@@ -1,5 +1,4 @@
-import React from 'react';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -10,8 +9,6 @@ import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-const Tab = createMaterialTopTabNavigator();
 
 // Sample posts data
 const allPosts = [
@@ -227,6 +224,20 @@ const CommunitiesFeedScreen = () => {
 
 export default function HomeTabNavigator() {
   const navigation = useNavigation<NavigationProp>();
+  const [activeTab, setActiveTab] = useState<'ForYou' | 'Following' | 'Communities'>('ForYou');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'ForYou':
+        return <ForYouScreen />;
+      case 'Following':
+        return <FollowingScreen />;
+      case 'Communities':
+        return <CommunitiesFeedScreen />;
+      default:
+        return <ForYouScreen />;
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -245,43 +256,39 @@ export default function HomeTabNavigator() {
         </TouchableOpacity>
       </View>
 
-      <Tab.Navigator
-        initialRouteName="ForYou"
-        screenOptions={{
-          tabBarActiveTintColor: Colors.primary,
-          tabBarInactiveTintColor: Colors.textLight,
-          tabBarIndicatorStyle: {
-            backgroundColor: Colors.primary,
-            height: 2,
-          },
-          tabBarStyle: {
-            backgroundColor: Colors.white,
-            borderBottomWidth: 1,
-            borderBottomColor: Colors.borderLight,
-          },
-          tabBarLabelStyle: {
-            fontSize: 14,
-            fontWeight: '600',
-            textTransform: 'none',
-          },
-        }}
-      >
-        <Tab.Screen 
-          name="ForYou" 
-          component={ForYouScreen} 
-          options={{ title: 'For you' }} 
-        />
-        <Tab.Screen 
-          name="Following" 
-          component={FollowingScreen} 
-          options={{ title: 'Following' }} 
-        />
-        <Tab.Screen
-          name="Communities"
-          component={CommunitiesFeedScreen}
-          options={{ title: 'Communities' }}
-        />
-      </Tab.Navigator>
+      <View style={styles.tabBar}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'ForYou' && styles.activeTab]}
+          onPress={() => setActiveTab('ForYou')}
+        >
+          <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>
+            For you
+          </Text>
+          {activeTab === 'ForYou' && <View style={styles.tabIndicator} />}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'Following' && styles.activeTab]}
+          onPress={() => setActiveTab('Following')}
+        >
+          <Text style={[styles.tabText, activeTab === 'Following' && styles.activeTabText]}>
+            Following
+          </Text>
+          {activeTab === 'Following' && <View style={styles.tabIndicator} />}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'Communities' && styles.activeTab]}
+          onPress={() => setActiveTab('Communities')}
+        >
+          <Text style={[styles.tabText, activeTab === 'Communities' && styles.activeTabText]}>
+            Communities
+          </Text>
+          {activeTab === 'Communities' && <View style={styles.tabIndicator} />}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.content}>
+        {renderContent()}
+      </View>
 
       <TouchableOpacity
         style={styles.fab}
@@ -453,6 +460,40 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeTab: {
+    // Active tab styling
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.textLight,
+  },
+  activeTabText: {
+    color: Colors.primary,
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: Colors.primary,
+  },
+  content: {
+    flex: 1,
   },
 });
 
