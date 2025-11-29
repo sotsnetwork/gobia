@@ -246,6 +246,7 @@ export default function HomeTabNavigator() {
       </View>
 
       <Tab.Navigator
+        initialRouteName="ForYou"
         screenOptions={{
           tabBarActiveTintColor: Colors.primary,
           tabBarInactiveTintColor: Colors.textLight,
@@ -265,8 +266,16 @@ export default function HomeTabNavigator() {
           },
         }}
       >
-        <Tab.Screen name="ForYou" component={ForYouScreen} options={{ title: 'For you' }} />
-        <Tab.Screen name="Following" component={FollowingScreen} options={{ title: 'Following' }} />
+        <Tab.Screen 
+          name="ForYou" 
+          component={ForYouScreen} 
+          options={{ title: 'For you' }} 
+        />
+        <Tab.Screen 
+          name="Following" 
+          component={FollowingScreen} 
+          options={{ title: 'Following' }} 
+        />
         <Tab.Screen
           name="Communities"
           component={CommunitiesFeedScreen}
