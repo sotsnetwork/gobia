@@ -35,7 +35,8 @@ export default function MainTabNavigator() {
         name="Home"
         component={HomeTabNavigator}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color, size = 24 }) => (
             <Ionicons name="home" size={size} color={color} />
           ),
         }}
@@ -44,7 +45,8 @@ export default function MainTabNavigator() {
         name="Search"
         component={SearchScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarLabel: 'Search',
+          tabBarIcon: ({ color, size = 24 }) => (
             <Ionicons name="search" size={size} color={color} />
           ),
         }}
@@ -53,7 +55,8 @@ export default function MainTabNavigator() {
         name="Communities"
         component={CommunitiesScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarLabel: 'Communities',
+          tabBarIcon: ({ color, size = 24 }) => (
             <Ionicons name="people" size={size} color={color} />
           ),
         }}
@@ -62,7 +65,8 @@ export default function MainTabNavigator() {
         name="Notifications"
         component={NotificationsScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarLabel: 'Notifications',
+          tabBarIcon: ({ color, size = 24 }) => (
             <Ionicons name="notifications-outline" size={size} color={color} />
           ),
         }}
@@ -71,7 +75,8 @@ export default function MainTabNavigator() {
         name="Messages"
         component={MessagesScreen}
         options={{
-          tabBarIcon: ({ color, size }) => (
+          tabBarLabel: 'Messages',
+          tabBarIcon: ({ color, size = 24 }) => (
             <Ionicons name="mail-outline" size={size} color={color} />
           ),
         }}
