@@ -14,7 +14,7 @@ export const ChatScreen = () => <PlaceholderScreen title="Chat" />;
 export const PrivacySettingsScreen = () => <PlaceholderScreen title="Privacy Settings" />;
 export const NotificationSettingsScreen = () => <PlaceholderScreen title="Notification Settings" />;
 export const ExportUserDataScreen = () => <PlaceholderScreen title="Export User Data" />;
-export const BlockedUsersScreen = () => <PlaceholderScreen title="Blocked Users" />;
+// BlockedUsersScreen is now a full implementation in src/screens/BlockedUsersScreen.tsx
 export const FAQsScreen = () => <PlaceholderScreen title="FAQs" />;
 export const ReportIssueScreen = () => <PlaceholderScreen title="Report an Issue" />;
 export const ShareFeedbackScreen = () => <PlaceholderScreen title="Share Your Feedback" />;
