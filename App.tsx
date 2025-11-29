@@ -14,8 +14,10 @@ import LoginScreen from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 
+// Main Tab Navigator
+import MainTabNavigator from './src/navigators/MainTabNavigator';
+
 // Main Screens
-import FeedScreen from './src/screens/FeedScreen';
 import PostDetailScreen from './src/screens/PostDetailScreen';
 import CreatePostScreen from './src/screens/CreatePostScreen';
 
@@ -55,11 +57,7 @@ import {
   CommunityInsightsScreen,
 } from './src/screens/PlaceholderScreens';
 
-// Community Screens
-import CommunitiesScreen from './src/screens/CommunitiesScreen';
-
-// Search Screens
-import SearchScreen from './src/screens/SearchScreen';
+// Community Screens (already imported in MainTabNavigator)
 
 // Settings Screens
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -138,7 +136,7 @@ export default function App() {
         <NavigationContainer>
           <StatusBar style="auto" />
           <Stack.Navigator
-            initialRouteName="Welcome"
+            initialRouteName="MainTabs"
             screenOptions={{
               headerShown: false,
               animation: 'slide_from_right',
@@ -150,8 +148,10 @@ export default function App() {
             <Stack.Screen name="SignUp" component={SignUpScreen} />
             <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
 
-            {/* Main */}
-            <Stack.Screen name="Feed" component={FeedScreen} />
+            {/* Main Tabs */}
+            <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+
+            {/* Detail Screens */}
             <Stack.Screen name="PostDetail" component={PostDetailScreen} />
             <Stack.Screen name="CreatePost" component={CreatePostScreen} />
 
@@ -165,18 +165,15 @@ export default function App() {
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
 
             {/* Communities */}
-            <Stack.Screen name="Communities" component={CommunitiesScreen} />
             <Stack.Screen name="CommunityDetail" component={CommunityDetailScreen} />
             <Stack.Screen name="CreateCommunity" component={CreateCommunityScreen} />
             <Stack.Screen name="Groups" component={GroupsScreen} />
 
             {/* Search */}
-            <Stack.Screen name="Search" component={SearchScreen} />
             <Stack.Screen name="AdvancedSearch" component={AdvancedSearchScreen} />
             <Stack.Screen name="AdvancedUserSearch" component={AdvancedUserSearchScreen} />
 
             {/* Messages */}
-            <Stack.Screen name="Messages" component={MessagesScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
 
             {/* Settings */}
