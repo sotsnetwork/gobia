@@ -5,8 +5,10 @@ export type RootStackParamList = {
   SignUp: undefined;
   ForgotPassword: undefined;
   
-  // Main
-  Feed: undefined;
+  // Main Tabs
+  MainTabs: undefined;
+  
+  // Detail Screens
   PostDetail: { postId: string };
   CreatePost: undefined;
   
