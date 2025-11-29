@@ -31,9 +31,7 @@ export default function SearchScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
-        </TouchableOpacity>
+        <View style={styles.headerLeft} />
         <Text style={styles.headerTitle}>Search</Text>
         <View style={styles.headerRight} />
       </View>
@@ -114,6 +112,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.text,
+  },
+  headerLeft: {
+    width: 24,
   },
   headerRight: {
     width: 24,
