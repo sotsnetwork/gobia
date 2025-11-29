@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -19,18 +20,22 @@ export default function FeedScreen() {
       name: 'You',
       handle: '@you',
       text: 'I am creating a feed for my app, what do you all think?',
+      timestamp: '2h',
       likes: 0,
       comments: 0,
-      boosts: 0,
+      reposts: 0,
+      saved: false,
     },
     {
       id: '2',
       name: 'andres',
       handle: '@andres',
       text: 'I am building an AI chatbot but need a product designer.',
+      timestamp: '5h',
       likes: 12,
       comments: 3,
-      boosts: 0,
+      reposts: 1,
+      saved: false,
     },
     {
       id: '3',
@@ -38,19 +43,22 @@ export default function FeedScreen() {
       handle: '@elena_dev',
       text: 'I just launched my new SaaS product on Product Hunt! Looking for feedback.',
       location: 'San Francisco, CA',
+      timestamp: '1d',
       likes: 256,
       comments: 42,
-      boosts: 1,
+      reposts: 15,
+      saved: false,
     },
     {
       id: '4',
       name: 'Builder Bro',
       handle: '@builderbro',
-      text: "I'm working on a cross-platform mobile app for builders and developers to share what they’re working on and get help. The app should feel simple, fast, and community-driven.",
+      text: "I'm working on a cross-platform mobile app for builders and developers to share what they're working on and get help. The app should feel simple, fast, and community-driven.",
       location: 'Remote',
+      timestamp: '2d',
       likes: 18,
       comments: 9,
-      boosts: 1,
+      reposts: 2,
       saved: true,
     },
   ];
@@ -81,48 +89,34 @@ export default function FeedScreen() {
                 <View style={styles.avatar} />
                 <View style={styles.postUserInfo}>
                   <Text style={styles.postUsername}>{post.name}</Text>
-                  <Text style={styles.postHandle}>{post.handle}</Text>
+                  <View style={styles.handleRow}>
+                    <Text style={styles.postHandle}>{post.handle}</Text>
+                    {post.timestamp && (
+                      <>
+                        <Text style={styles.handleSeparator}> · </Text>
+                        <Text style={styles.postTimestamp}>{post.timestamp}</Text>
+                      </>
+                    )}
+                  </View>
                 </View>
               </View>
-            <Text style={styles.postText}>{post.text}</Text>
-            {post.location && (
-              <View style={styles.locationRow}>
-                <Ionicons name="location-outline" size={14} color={Colors.textLight} />
-                <Text style={styles.locationText}>{post.location}</Text>
-              </View>
-            )}
-            <View style={styles.postActions}>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons
-                  name="heart-outline"
-                  size={18}
-                  color={post.likes > 0 ? Colors.primary : Colors.textLight}
-                />
-                <Text
-                  style={[
-                    styles.postActionText,
-                    post.likes > 0 && styles.highlightText,
-                  ]}
-                >
-                  {post.likes}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-                <Text style={styles.postActionText}>{post.comments}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons name="arrow-up-outline" size={18} color={Colors.textLight} />
-                {post.boosts ? <Text style={styles.postActionText}>{post.boosts}</Text> : null}
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.postAction}>
-                <Ionicons
-                  name={post.saved ? 'bookmark' : 'bookmark-outline'}
-                  size={18}
-                  color={post.saved ? Colors.primary : Colors.textLight}
-                />
-              </TouchableOpacity>
-            </View>
+              <Text style={styles.postText}>{post.text}</Text>
+              {post.location && (
+                <View style={styles.locationRow}>
+                  <Ionicons name="location-outline" size={14} color={Colors.textLight} />
+                  <Text style={styles.locationText}>{post.location}</Text>
+                </View>
+              )}
+              <PostActions
+                post={post}
+                onComment={() => navigation.navigate('PostDetail', { post })}
+                onRepost={() => {
+                  // Handle repost
+                }}
+                onQuote={() => {
+                  navigation.navigate('QuotePost', { post });
+                }}
+              />
             </View>
           </TouchableOpacity>
         ))}
@@ -208,6 +202,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textLight,
   },
+  handleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  handleSeparator: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
+  postTimestamp: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
   postText: {
     fontSize: 16,
     color: Colors.text,
@@ -223,24 +229,6 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 14,
     color: Colors.textSecondary,
-  },
-  postActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  postAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  postActionText: {
-    fontSize: 14,
-    color: Colors.textLight,
-  },
-  highlightText: {
-    color: Colors.primary,
   },
   fab: {
     position: 'absolute',
@@ -259,4 +247,3 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 });
-
