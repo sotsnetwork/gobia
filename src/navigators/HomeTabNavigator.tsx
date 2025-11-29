@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -17,6 +18,7 @@ const allPosts = [
     name: 'You',
     handle: '@you',
     text: 'I am creating a feed for my app, what do you all think?',
+    timestamp: '2h',
     likes: 0,
     comments: 0,
     boosts: 0,
@@ -26,6 +28,7 @@ const allPosts = [
     name: 'andres',
     handle: '@andres',
     text: 'I am building an AI chatbot but need a product designer.',
+    timestamp: '5h',
     likes: 12,
     comments: 3,
     boosts: 0,
@@ -36,6 +39,7 @@ const allPosts = [
     handle: '@elena_dev',
     text: 'I just launched my new SaaS product on Product Hunt! Looking for feedback.',
     location: 'San Francisco, CA',
+    timestamp: '1d',
     likes: 256,
     comments: 42,
     boosts: 1,
@@ -46,6 +50,7 @@ const allPosts = [
     handle: '@builderbro',
     text: "I'm working on a cross-platform mobile app for builders and developers to share what they're working on and get help. The app should feel simple, fast, and community-driven.",
     location: 'Remote',
+    timestamp: '2d',
     likes: 18,
     comments: 9,
     boosts: 1,
@@ -59,6 +64,7 @@ const followingPosts = [
     name: 'andres',
     handle: '@andres',
     text: 'I am building an AI chatbot but need a product designer.',
+    timestamp: '5h',
     likes: 12,
     comments: 3,
     boosts: 0,
@@ -69,6 +75,7 @@ const followingPosts = [
     handle: '@elena_dev',
     text: 'I just launched my new SaaS product on Product Hunt! Looking for feedback.',
     location: 'San Francisco, CA',
+    timestamp: '1d',
     likes: 256,
     comments: 42,
     boosts: 1,
@@ -82,6 +89,7 @@ const communityPosts = [
     handle: '@reactnative_devs',
     text: 'Just released React Native 0.81! Check out the new features.',
     community: 'React Native Developers',
+    timestamp: '3h',
     likes: 89,
     comments: 15,
     boosts: 2,
@@ -92,6 +100,7 @@ const communityPosts = [
     handle: '@ai_startups',
     text: 'Weekly community meetup this Friday. Join us!',
     community: 'AI Startups',
+    timestamp: '6h',
     likes: 34,
     comments: 8,
     boosts: 1,
@@ -101,14 +110,22 @@ const communityPosts = [
 const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp }) => (
   <TouchableOpacity
     activeOpacity={0.9}
-    onPress={() => navigation.navigate('PostDetail', { postId: post.id })}
+    onPress={() => navigation.navigate('PostDetail', { post })}
   >
     <View style={styles.post}>
       <View style={styles.postHeader}>
         <View style={styles.avatar} />
         <View style={styles.postUserInfo}>
           <Text style={styles.postUsername}>{post.name}</Text>
-          <Text style={styles.postHandle}>{post.handle}</Text>
+          <View style={styles.handleRow}>
+            <Text style={styles.postHandle}>{post.handle}</Text>
+            {post.timestamp && (
+              <>
+                <Text style={styles.handleSeparator}> · </Text>
+                <Text style={styles.postTimestamp}>{post.timestamp}</Text>
+              </>
+            )}
+          </View>
         </View>
       </View>
       {post.community && (
@@ -124,38 +141,19 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
           <Text style={styles.locationText}>{post.location}</Text>
         </View>
       )}
-      <View style={styles.postActions}>
-        <TouchableOpacity style={styles.postAction}>
-          <Ionicons
-            name="heart-outline"
-            size={18}
-            color={post.likes > 0 ? Colors.primary : Colors.textLight}
-          />
-          <Text
-            style={[
-              styles.postActionText,
-              post.likes > 0 && styles.highlightText,
-            ]}
-          >
-            {post.likes}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.postAction}>
-          <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-          <Text style={styles.postActionText}>{post.comments}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.postAction}>
-          <Ionicons name="arrow-up-outline" size={18} color={Colors.textLight} />
-          {post.boosts ? <Text style={styles.postActionText}>{post.boosts}</Text> : null}
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.postAction}>
-          <Ionicons
-            name={post.saved ? 'bookmark' : 'bookmark-outline'}
-            size={18}
-            color={post.saved ? Colors.primary : Colors.textLight}
-          />
-        </TouchableOpacity>
-      </View>
+      <PostActions
+        post={{
+          ...post,
+          reposts: post.boosts || post.reposts || 0,
+        }}
+        onComment={() => navigation.navigate('PostDetail', { post })}
+        onRepost={() => {
+          // Handle repost
+        }}
+        onQuote={() => {
+          navigation.navigate('QuotePost', { post });
+        }}
+      />
     </View>
   </TouchableOpacity>
 );
@@ -372,6 +370,18 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   postHandle: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
+  handleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  handleSeparator: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
+  postTimestamp: {
     fontSize: 14,
     color: Colors.textLight,
   },
