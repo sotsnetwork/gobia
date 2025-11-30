@@ -25,6 +25,7 @@ export default function PostDetailScreen() {
     likes: 12,
     comments: 5,
     reposts: 3,
+    views: 120,
     saved: false,
   };
 
@@ -45,7 +46,7 @@ export default function PostDetailScreen() {
       name: 'CodeWizard',
       handle: '@wizard',
       time: '1h',
-      text: 'Great initiative! Is this going to be open source? I'd love to contribute.',
+      text: "Great initiative! Is this going to be open source? I'd love to contribute.",
       likes: 8,
       reposts: 0,
       saved: false,
