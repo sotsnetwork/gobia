@@ -63,7 +63,7 @@ export default function SignUpScreen() {
 
           <Button
             title="Sign Up"
-            onPress={() => navigation.navigate('Feed')}
+            onPress={() => navigation.navigate('MainTabs')}
           />
 
           <View style={styles.separator}>
