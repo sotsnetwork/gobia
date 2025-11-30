@@ -1,81 +1,115 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as BookmarkService from '../services/bookmarkService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const savedPosts = [
-  {
-    id: '1',
-    author: 'Sarah Johnson',
-    handle: '@sarahj',
-    text: 'Just launched my new AI-powered design tool! Check it out and let me know what you think.',
-    time: '2h',
-    likes: 45,
-    comments: 12,
-  },
-  {
-    id: '2',
-    author: 'Mike Davis',
-    handle: '@miked',
-    text: 'Looking for a co-founder with expertise in ML/AI. Building something big in the creator economy space.',
-    time: '1d',
-    likes: 89,
-    comments: 23,
-  },
-  {
-    id: '3',
-    author: 'Elena Martinez',
-    handle: '@elena_dev',
-    text: 'Great resources for learning React Native. Sharing my curated list of tutorials and docs.',
-    time: '3d',
-    likes: 156,
-    comments: 34,
-  },
-];
-
 export default function SavedPostsScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const [savedPosts, setSavedPosts] = useState<BookmarkService.BookmarkedPost[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadBookmarks = async () => {
+    try {
+      const bookmarks = await BookmarkService.getBookmarkedPosts();
+      setSavedPosts(bookmarks);
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadBookmarks();
+    }, [])
+  );
+
+  const handleRemoveBookmark = async (postId: string) => {
+    Alert.alert(
+      'Remove Bookmark',
+      'Are you sure you want to remove this post from your bookmarks?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await BookmarkService.removePost(postId);
+              await loadBookmarks();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to remove bookmark');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadBookmarks();
+    setRefreshing(false);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header title="Saved Posts" />
-      <ScrollView style={styles.scrollView}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {savedPosts.length > 0 ? (
           savedPosts.map((post) => (
-            <TouchableOpacity
-              key={post.id}
-              style={styles.post}
-              onPress={() => navigation.navigate('PostDetail', { postId: post.id })}
-            >
-              <View style={styles.postHeader}>
-                <View style={styles.avatar} />
-                <View style={styles.postUserInfo}>
-                  <Text style={styles.postAuthor}>{post.author}</Text>
-                  <Text style={styles.postHandle}>{post.handle} · {post.time}</Text>
+            <View key={post.id} style={styles.post}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('PostDetail', { postId: post.id, post })}
+              >
+                <View style={styles.postHeader}>
+                  <View style={styles.avatar} />
+                  <View style={styles.postUserInfo}>
+                    <Text style={styles.postAuthor}>{post.name}</Text>
+                    <Text style={styles.postHandle}>
+                      {post.handle} · {post.time || post.timestamp || 'Recently'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveBookmark(post.id)}
+                    style={styles.bookmarkButton}
+                  >
+                    <Ionicons name="bookmark" size={20} color={Colors.primary} />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity>
-                  <Ionicons name="bookmark" size={20} color={Colors.primary} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.postText}>{post.text}</Text>
-              <View style={styles.postActions}>
-                <View style={styles.postAction}>
-                  <Ionicons name="heart-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.likes}</Text>
-                </View>
-                <View style={styles.postAction}>
-                  <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.comments}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+                <Text style={styles.postText}>{post.text}</Text>
+              </TouchableOpacity>
+              <PostActions
+                post={{
+                  id: post.id,
+                  name: post.name,
+                  handle: post.handle,
+                  text: post.text,
+                  likes: post.likes,
+                  comments: post.comments,
+                  reposts: post.reposts,
+                  views: post.views,
+                  saved: true,
+                  timestamp: post.timestamp,
+                  time: post.time,
+                }}
+                onBookmark={async () => {
+                  await loadBookmarks();
+                }}
+                onComment={() => navigation.navigate('PostDetail', { postId: post.id, post })}
+              />
+            </View>
           ))
         ) : (
           <View style={styles.emptyContainer}>
@@ -129,6 +163,9 @@ const styles = StyleSheet.create({
   postHandle: {
     fontSize: 14,
     color: Colors.textLight,
+  },
+  bookmarkButton: {
+    padding: 4,
   },
   postText: {
     fontSize: 16,
