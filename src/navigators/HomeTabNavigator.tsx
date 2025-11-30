@@ -116,11 +116,11 @@ const communityPosts = [
 ];
 
 const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp }) => (
-  <TouchableOpacity
-    activeOpacity={0.9}
-    onPress={() => navigation.navigate('PostDetail', { post })}
-  >
-    <View style={styles.post}>
+  <View style={styles.post}>
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('PostDetail', { post })}
+    >
       <View style={styles.postHeader}>
         <View style={styles.avatar} />
         <View style={styles.postUserInfo}>
@@ -149,21 +149,21 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
           <Text style={styles.locationText}>{post.location}</Text>
         </View>
       )}
-      <PostActions
-        post={{
-          ...post,
-          reposts: post.boosts || post.reposts || 0,
-        }}
-        onComment={() => navigation.navigate('PostDetail', { post })}
-        onRepost={() => {
-          // Handle repost
-        }}
-        onQuote={() => {
-          navigation.navigate('QuotePost', { post });
-        }}
-      />
-    </View>
-  </TouchableOpacity>
+    </TouchableOpacity>
+    <PostActions
+      post={{
+        ...post,
+        reposts: post.boosts || post.reposts || 0,
+      }}
+      onComment={() => navigation.navigate('PostDetail', { post })}
+      onRepost={() => {
+        // Handle repost
+      }}
+      onQuote={() => {
+        navigation.navigate('QuotePost', { post });
+      }}
+    />
+  </View>
 );
 
 const ForYouScreen = () => {
