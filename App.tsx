@@ -63,6 +63,9 @@ import {
 // Settings Screens
 import SettingsScreen from './src/screens/SettingsScreen';
 import BlockedUsersScreen from './src/screens/BlockedUsersScreen';
+import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
+import EmailAddressScreen from './src/screens/EmailAddressScreen';
+import ConnectedAccountsScreen from './src/screens/ConnectedAccountsScreen';
 
 // Support Screens
 import HelpSupportScreen from './src/screens/HelpSupportScreen';
@@ -184,6 +187,9 @@ export default function App() {
             <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
             <Stack.Screen name="ExportUserData" component={ExportUserDataScreen} />
             <Stack.Screen name="BlockedUsers" component={BlockedUsersScreen} />
+            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+            <Stack.Screen name="EmailAddress" component={EmailAddressScreen} />
+            <Stack.Screen name="ConnectedAccounts" component={ConnectedAccountsScreen} />
 
             {/* Support */}
             <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
