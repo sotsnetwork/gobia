@@ -39,6 +39,9 @@ export type RootStackParamList = {
   NotificationSettings: undefined;
   ExportUserData: undefined;
   BlockedUsers: undefined;
+  ChangePassword: undefined;
+  EmailAddress: undefined;
+  ConnectedAccounts: undefined;
   
   // Support
   HelpSupport: undefined;
