@@ -62,6 +62,8 @@ export default function SettingsScreen() {
           <SettingItem icon="lock-closed-outline" title="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
           <SettingItem icon="mail-outline" title="Email Address" onPress={() => navigation.navigate('EmailAddress')} />
           <SettingItem icon="link-outline" title="Connected Accounts" onPress={() => navigation.navigate('ConnectedAccounts')} />
+          <SettingItem icon="time-outline" title="Activity Log" onPress={() => navigation.navigate('ActivityLog')} />
+          <SettingItem icon="archive-outline" title="Archived Posts" onPress={() => navigation.navigate('ArchivedPosts')} />
         </View>
 
         <Text style={styles.sectionTitle}>Notifications</Text>
