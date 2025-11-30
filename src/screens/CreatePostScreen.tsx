@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -24,14 +25,41 @@ interface User {
   avatar?: string;
 }
 
+interface MediaFile {
+  uri: string;
+  type: 'image' | 'video';
+  size: number; // in bytes
+  name?: string;
+}
+
+interface ThreadPost {
+  id: string;
+  text: string;
+  media: MediaFile[];
+  characterCount: number;
+}
+
 export default function CreatePostScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [text, setText] = useState('I am building an AI app and I would love to connect with @');
-  const [characterCount, setCharacterCount] = useState(60);
+  const [isThread, setIsThread] = useState(false);
+  const [threadPosts, setThreadPosts] = useState<ThreadPost[]>([
+    {
+      id: '1',
+      text: 'I am building an AI app and I would love to connect with @',
+      media: [],
+      characterCount: 60,
+    },
+  ]);
+  const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [showMentions, setShowMentions] = useState(true);
   const [mentionQuery, setMentionQuery] = useState('');
+
+  const currentPost = threadPosts[currentPostIndex];
+  const text = currentPost.text;
+  const characterCount = currentPost.characterCount;
+  const media = currentPost.media;
 
   // Sample users for mentions
   const suggestedUsers: User[] = [
@@ -40,9 +68,16 @@ export default function CreatePostScreen() {
     { id: '3', name: 'JaneSmith', handle: 'jane_smith' },
   ];
 
+  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB in bytes
+
   const handleTextChange = (value: string) => {
-    setText(value);
-    setCharacterCount(280 - value.length);
+    const updatedPosts = [...threadPosts];
+    updatedPosts[currentPostIndex] = {
+      ...updatedPosts[currentPostIndex],
+      text: value,
+      characterCount: 280 - value.length,
+    };
+    setThreadPosts(updatedPosts);
 
     // Check if user is typing '@' for mentions
     const lastAtIndex = value.lastIndexOf('@');
@@ -72,11 +107,145 @@ export default function CreatePostScreen() {
       const afterMention = spaceIndex !== -1 ? afterAt.substring(spaceIndex) : ' ';
       
       const newText = `${beforeAt}@${user.handle}${afterMention}`;
-      setText(newText);
-      setCharacterCount(280 - newText.length);
+      const updatedPosts = [...threadPosts];
+      updatedPosts[currentPostIndex] = {
+        ...updatedPosts[currentPostIndex],
+        text: newText,
+        characterCount: 280 - newText.length,
+      };
+      setThreadPosts(updatedPosts);
       setShowMentions(false);
       setMentionQuery('');
     }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant camera roll permissions to add images.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newMedia: MediaFile[] = result.assets
+          .filter((asset) => {
+            const size = asset.fileSize || 0;
+            if (size > MAX_FILE_SIZE) {
+              Alert.alert('File too large', `${asset.fileName || 'File'} is larger than 100MB. Please choose a smaller file.`);
+              return false;
+            }
+            return true;
+          })
+          .map((asset) => ({
+            uri: asset.uri,
+            type: 'image' as const,
+            size: asset.fileSize || 0,
+            name: asset.fileName,
+          }));
+
+        if (newMedia.length > 0) {
+          const updatedPosts = [...threadPosts];
+          updatedPosts[currentPostIndex] = {
+            ...updatedPosts[currentPostIndex],
+            media: [...updatedPosts[currentPostIndex].media, ...newMedia],
+          };
+          setThreadPosts(updatedPosts);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
+
+  const handlePickVideo = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant camera roll permissions to add videos.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsMultipleSelection: true,
+        videoQuality: ImagePicker.VideoQuality.Medium,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newMedia: MediaFile[] = result.assets
+          .filter((asset) => {
+            const size = asset.fileSize || 0;
+            if (size > MAX_FILE_SIZE) {
+              Alert.alert('File too large', `${asset.fileName || 'File'} is larger than 100MB. Please choose a smaller file.`);
+              return false;
+            }
+            return true;
+          })
+          .map((asset) => ({
+            uri: asset.uri,
+            type: 'video' as const,
+            size: asset.fileSize || 0,
+            name: asset.fileName,
+          }));
+
+        if (newMedia.length > 0) {
+          const updatedPosts = [...threadPosts];
+          updatedPosts[currentPostIndex] = {
+            ...updatedPosts[currentPostIndex],
+            media: [...updatedPosts[currentPostIndex].media, ...newMedia],
+          };
+          setThreadPosts(updatedPosts);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick video. Please try again.');
+    }
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    const updatedPosts = [...threadPosts];
+    updatedPosts[currentPostIndex] = {
+      ...updatedPosts[currentPostIndex],
+      media: updatedPosts[currentPostIndex].media.filter((_, i) => i !== index),
+    };
+    setThreadPosts(updatedPosts);
+  };
+
+  const handleAddThreadPost = () => {
+    const newPost: ThreadPost = {
+      id: Date.now().toString(),
+      text: '',
+      media: [],
+      characterCount: 280,
+    };
+    setThreadPosts([...threadPosts, newPost]);
+    setCurrentPostIndex(threadPosts.length);
+    setIsThread(true);
+  };
+
+  const handleRemoveThreadPost = (index: number) => {
+    if (threadPosts.length === 1) {
+      Alert.alert('Cannot remove', 'You must have at least one post in the thread.');
+      return;
+    }
+    const updatedPosts = threadPosts.filter((_, i) => i !== index);
+    setThreadPosts(updatedPosts);
+    if (currentPostIndex >= updatedPosts.length) {
+      setCurrentPostIndex(updatedPosts.length - 1);
+    }
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   // Filter users based on mention query
@@ -137,16 +306,85 @@ export default function CreatePostScreen() {
         </View>
 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          {/* Thread Posts */}
+          {isThread && threadPosts.length > 1 && (
+            <View style={styles.threadHeader}>
+              <Text style={styles.threadTitle}>Thread ({threadPosts.length} posts)</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.threadTabs}>
+                {threadPosts.map((post, index) => (
+                  <TouchableOpacity
+                    key={post.id}
+                    style={[
+                      styles.threadTab,
+                      currentPostIndex === index && styles.threadTabActive,
+                    ]}
+                    onPress={() => setCurrentPostIndex(index)}
+                  >
+                    <Text
+                      style={[
+                        styles.threadTabText,
+                        currentPostIndex === index && styles.threadTabTextActive,
+                      ]}
+                    >
+                      {index + 1}
+                    </Text>
+                    {threadPosts.length > 1 && (
+                      <TouchableOpacity
+                        onPress={() => handleRemoveThreadPost(index)}
+                        style={styles.removeThreadButton}
+                      >
+                        <Ionicons name="close-circle" size={16} color={Colors.error} />
+                      </TouchableOpacity>
+                    )}
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  style={styles.addThreadButton}
+                  onPress={handleAddThreadPost}
+                >
+                  <Ionicons name="add" size={20} color={Colors.primary} />
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
+          )}
+
           <View style={styles.postContent}>
             <View style={styles.avatar} />
-            <TextInput
-              style={styles.textInput}
-              multiline
-              placeholder="What are you working on?"
-              value={text}
-              onChangeText={handleTextChange}
-              placeholderTextColor={Colors.textLight}
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.textInput}
+                multiline
+                placeholder="What are you working on?"
+                value={text}
+                onChangeText={handleTextChange}
+                placeholderTextColor={Colors.textLight}
+              />
+              {/* Media Previews */}
+              {media.length > 0 && (
+                <View style={styles.mediaContainer}>
+                  {media.map((file, index) => (
+                    <View key={index} style={styles.mediaItem}>
+                      {file.type === 'image' ? (
+                        <Image source={{ uri: file.uri }} style={styles.mediaPreview} />
+                      ) : (
+                        <View style={styles.videoPreview}>
+                          <Ionicons name="videocam" size={32} color={Colors.white} />
+                        </View>
+                      )}
+                      <TouchableOpacity
+                        style={styles.removeMediaButton}
+                        onPress={() => handleRemoveMedia(index)}
+                      >
+                        <Ionicons name="close-circle" size={24} color={Colors.error} />
+                      </TouchableOpacity>
+                      <View style={styles.mediaInfo}>
+                        <Text style={styles.mediaSize}>{formatFileSize(file.size)}</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
           </View>
 
           {/* Mention Suggestions - Show when '@' is typed */}
@@ -235,17 +473,71 @@ export default function CreatePostScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Thread Toggle */}
+          <View style={styles.threadToggle}>
+            <TouchableOpacity
+              style={[styles.threadToggleButton, isThread && styles.threadToggleActive]}
+              onPress={() => {
+                if (!isThread) {
+                  setIsThread(true);
+                } else {
+                  Alert.alert(
+                    'Remove Thread',
+                    'Are you sure you want to convert this to a single post? All additional posts will be removed.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Remove',
+                        style: 'destructive',
+                        onPress: () => {
+                          setIsThread(false);
+                          setThreadPosts([threadPosts[0]]);
+                          setCurrentPostIndex(0);
+                        },
+                      },
+                    ]
+                  );
+                }
+              }}
+            >
+              <Ionicons
+                name={isThread ? 'layers' : 'layers-outline'}
+                size={20}
+                color={isThread ? Colors.white : Colors.primary}
+              />
+              <Text
+                style={[
+                  styles.threadToggleText,
+                  isThread && styles.threadToggleTextActive,
+                ]}
+              >
+                {isThread ? 'Thread' : 'Create Thread'}
+              </Text>
+            </TouchableOpacity>
+            {isThread && (
+              <TouchableOpacity
+                style={styles.addPostButton}
+                onPress={handleAddThreadPost}
+              >
+                <Ionicons name="add" size={20} color={Colors.primary} />
+                <Text style={styles.addPostText}>Add Post</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
           {/* Action Bar */}
           <View style={styles.actionBar}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handlePickImage}>
               <Ionicons name="image-outline" size={24} color={Colors.primary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity style={styles.actionButton} onPress={handlePickVideo}>
               <Ionicons name="videocam-outline" size={24} color={Colors.primary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Ionicons name="link-outline" size={24} color={Colors.primary} />
-            </TouchableOpacity>
+            {media.length > 0 && (
+              <Text style={styles.mediaCount}>
+                {media.length} {media.length === 1 ? 'file' : 'files'}
+              </Text>
+            )}
             <View style={styles.characterCount}>
               <Text style={styles.characterCountText}>{characterCount}/280</Text>
             </View>
@@ -386,12 +678,159 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primaryLight,
     marginRight: 12,
   },
-  textInput: {
+  inputContainer: {
     flex: 1,
+  },
+  textInput: {
     fontSize: 16,
     color: Colors.text,
     minHeight: 100,
     textAlignVertical: 'top',
+    marginBottom: 8,
+  },
+  mediaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  mediaItem: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  mediaPreview: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.borderLight,
+  },
+  videoPreview: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeMediaButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+  },
+  mediaInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+  },
+  mediaSize: {
+    fontSize: 10,
+    color: Colors.white,
+    textAlign: 'center',
+  },
+  threadHeader: {
+    marginBottom: 16,
+  },
+  threadTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  threadTabs: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  threadTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+    gap: 6,
+  },
+  threadTabActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  threadTabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  threadTabTextActive: {
+    color: Colors.white,
+  },
+  removeThreadButton: {
+    marginLeft: 4,
+  },
+  addThreadButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  threadToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  threadToggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
+    gap: 6,
+  },
+  threadToggleActive: {
+    backgroundColor: Colors.primary,
+  },
+  threadToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  threadToggleTextActive: {
+    color: Colors.white,
+  },
+  addPostButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
+    gap: 6,
+  },
+  addPostText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  mediaCount: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginLeft: 8,
   },
   suggestionsCard: {
     backgroundColor: Colors.white,
