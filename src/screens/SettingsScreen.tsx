@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,6 +16,48 @@ export default function SettingsScreen() {
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [privateProfile, setPrivateProfile] = useState(false);
 
+  const handlePushNotificationsChange = (value: boolean) => {
+    setPushNotifications(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? 'Push Notifications Enabled' : 'Push Notifications Disabled',
+        value
+          ? 'You will receive push notifications on your device.'
+          : 'You will no longer receive push notifications.',
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
+  const handleEmailNotificationsChange = (value: boolean) => {
+    setEmailNotifications(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? 'Email Notifications Enabled' : 'Email Notifications Disabled',
+        value
+          ? 'You will receive email notifications.'
+          : 'You will no longer receive email notifications.',
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
+  const handlePrivateProfileChange = (value: boolean) => {
+    setPrivateProfile(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? 'Private Profile Enabled' : 'Private Profile Disabled',
+        value
+          ? 'Your profile is now private. Only approved followers can see your posts.'
+          : 'Your profile is now public. Everyone can see your posts.',
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
   const SettingItem = ({ 
     icon, 
     title, 
@@ -26,13 +68,25 @@ export default function SettingsScreen() {
     title: string; 
     onPress?: () => void;
     rightComponent?: React.ReactNode;
-  }) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress} disabled={!onPress}>
-      <Ionicons name={icon as any} size={24} color={Colors.text} />
-      <Text style={styles.settingText}>{title}</Text>
-      {rightComponent || <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />}
-    </TouchableOpacity>
-  );
+  }) => {
+    // Filter items based on search query
+    if (searchQuery.trim() && !title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return null;
+    }
+    return (
+      <TouchableOpacity style={styles.settingItem} onPress={onPress} disabled={!onPress}>
+        <Ionicons name={icon as any} size={24} color={Colors.text} />
+        <Text style={styles.settingText}>{title}</Text>
+        {rightComponent || <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />}
+      </TouchableOpacity>
+    );
+  };
+
+  // Helper function to conditionally render sections based on search
+  const shouldShowSection = (items: string[]) => {
+    if (!searchQuery.trim()) return true;
+    return items.some(item => item.toLowerCase().includes(searchQuery.toLowerCase()));
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -56,8 +110,10 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Account Settings</Text>
-        <View style={styles.section}>
+        {shouldShowSection(['Edit Profile', 'Change Password', 'Email Address', 'Connected Accounts', 'Activity Log', 'Archived Posts']) && (
+          <>
+            <Text style={styles.sectionTitle}>Account Settings</Text>
+            <View style={styles.section}>
           <SettingItem icon="person-outline" title="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
           <SettingItem icon="lock-closed-outline" title="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
           <SettingItem icon="mail-outline" title="Email Address" onPress={() => navigation.navigate('EmailAddress')} />
@@ -65,8 +121,12 @@ export default function SettingsScreen() {
           <SettingItem icon="time-outline" title="Activity Log" onPress={() => navigation.navigate('ActivityLog')} />
           <SettingItem icon="archive-outline" title="Archived Posts" onPress={() => navigation.navigate('ArchivedPosts')} />
         </View>
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>Notifications</Text>
+        {shouldShowSection(['Push Notifications', 'Email Notifications', 'Manage Notification Types']) && (
+          <>
+            <Text style={styles.sectionTitle}>Notifications</Text>
         <View style={styles.section}>
           <SettingItem
             icon="notifications-outline"
@@ -74,7 +134,7 @@ export default function SettingsScreen() {
             rightComponent={
               <Switch
                 value={pushNotifications}
-                onValueChange={setPushNotifications}
+                onValueChange={handlePushNotificationsChange}
                 trackColor={{ false: Colors.border, true: Colors.primary }}
               />
             }
@@ -85,15 +145,19 @@ export default function SettingsScreen() {
             rightComponent={
               <Switch
                 value={emailNotifications}
-                onValueChange={setEmailNotifications}
+                onValueChange={handleEmailNotificationsChange}
                 trackColor={{ false: Colors.border, true: Colors.primary }}
               />
             }
           />
           <SettingItem icon="options-outline" title="Manage Notification Types" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>Privacy and Safety</Text>
+        {shouldShowSection(['Private Profile', 'Blocked Accounts']) && (
+          <>
+            <Text style={styles.sectionTitle}>Privacy and Safety</Text>
         <View style={styles.section}>
           <SettingItem
             icon="shield-outline"
@@ -101,7 +165,7 @@ export default function SettingsScreen() {
             rightComponent={
               <Switch
                 value={privateProfile}
-                onValueChange={setPrivateProfile}
+                onValueChange={handlePrivateProfileChange}
                 trackColor={{ false: Colors.border, true: Colors.primary }}
               />
             }
@@ -112,22 +176,34 @@ export default function SettingsScreen() {
             onPress={() => navigation.navigate('BlockedUsers')}
           />
         </View>
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>General</Text>
+        {shouldShowSection(['Display & Theme', 'Accessibility', 'Language']) && (
+          <>
+            <Text style={styles.sectionTitle}>General</Text>
         <View style={styles.section}>
           <SettingItem icon="color-palette-outline" title="Display & Theme" onPress={() => navigation.navigate('DisplayTheme')} />
           <SettingItem icon="accessibility-outline" title="Accessibility" onPress={() => navigation.navigate('Accessibility')} />
           <SettingItem icon="language-outline" title="Language" onPress={() => navigation.navigate('Language')} />
         </View>
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>About Us</Text>
+        {shouldShowSection(['About the App', 'Terms of Service', 'Privacy Policy']) && (
+          <>
+            <Text style={styles.sectionTitle}>About Us</Text>
         <View style={styles.section}>
           <SettingItem icon="information-circle-outline" title="About the App" onPress={() => navigation.navigate('AboutUs')} />
           <SettingItem icon="document-text-outline" title="Terms of Service" onPress={() => navigation.navigate('TermsOfService')} />
           <SettingItem icon="shield-checkmark-outline" title="Privacy Policy" onPress={() => navigation.navigate('PrivacyPolicy')} />
         </View>
+          </>
+        )}
 
-        <Text style={styles.sectionTitle}>Help & Support</Text>
+        {shouldShowSection(['Help Center', 'Report a Problem', 'Rate the App']) && (
+          <>
+            <Text style={styles.sectionTitle}>Help & Support</Text>
         <View style={styles.section}>
           <SettingItem icon="help-circle-outline" title="Help Center" onPress={() => navigation.navigate('HelpSupport')} />
           <SettingItem icon="warning-outline" title="Report a Problem" onPress={() => navigation.navigate('ReportIssue')} />
@@ -138,13 +214,36 @@ export default function SettingsScreen() {
             rightComponent={<Ionicons name="star" size={20} color={Colors.primary} />}
           />
         </View>
+          </>
+        )}
 
-        <TouchableOpacity style={styles.logoutButton}>
+        {(!searchQuery.trim() || 'Log Out'.toLowerCase().includes(searchQuery.toLowerCase())) && (
+          <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => {
+            Alert.alert(
+              'Log Out',
+              'Are you sure you want to log out?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Log Out',
+                  style: 'destructive',
+                  onPress: () => {
+                    // In real app, would clear auth state and navigate to Welcome
+                    navigation.navigate('Welcome');
+                  },
+                },
+              ]
+            );
+          }}
+        >
           <Ionicons name="log-out-outline" size={24} color={Colors.error} />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
+        )}
 
-        <Text style={styles.version}>Version 1.0.0</Text>
+        {!searchQuery.trim() && <Text style={styles.version}>Version 1.0.0</Text>}
       </ScrollView>
     </SafeAreaView>
   );
