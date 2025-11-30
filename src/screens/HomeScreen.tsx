@@ -21,7 +21,7 @@ export default function HomeScreen() {
           </Text>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Feed')}
+            onPress={() => navigation.navigate('MainTabs')}
           >
             <Text style={styles.buttonText}>Go to Feed</Text>
           </TouchableOpacity>
