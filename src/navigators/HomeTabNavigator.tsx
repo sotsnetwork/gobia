@@ -22,6 +22,7 @@ const allPosts = [
     likes: 0,
     comments: 0,
     boosts: 0,
+    views: 45,
   },
   {
     id: '2',
@@ -32,6 +33,7 @@ const allPosts = [
     likes: 12,
     comments: 3,
     boosts: 0,
+    views: 234,
   },
   {
     id: '3',
@@ -43,6 +45,7 @@ const allPosts = [
     likes: 256,
     comments: 42,
     boosts: 1,
+    views: 6600,
   },
   {
     id: '4',
@@ -54,6 +57,7 @@ const allPosts = [
     likes: 18,
     comments: 9,
     boosts: 1,
+    views: 892,
     saved: true,
   },
 ];
@@ -68,6 +72,7 @@ const followingPosts = [
     likes: 12,
     comments: 3,
     boosts: 0,
+    views: 234,
   },
   {
     id: '3',
@@ -79,6 +84,7 @@ const followingPosts = [
     likes: 256,
     comments: 42,
     boosts: 1,
+    views: 6600,
   },
 ];
 
@@ -93,6 +99,7 @@ const communityPosts = [
     likes: 89,
     comments: 15,
     boosts: 2,
+    views: 1200,
   },
   {
     id: '6',
@@ -104,6 +111,7 @@ const communityPosts = [
     likes: 34,
     comments: 8,
     boosts: 1,
+    views: 567,
   },
 ];
 
