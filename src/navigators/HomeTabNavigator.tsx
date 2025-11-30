@@ -137,10 +137,20 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
         </View>
       </View>
       {post.community && (
-        <View style={styles.communityBadge}>
+        <TouchableOpacity
+          style={styles.communityBadge}
+          onPress={() => {
+            navigation.navigate('CommunityDetail', {
+              communityId: post.communityId || '1',
+              communityName: post.community,
+            });
+          }}
+          activeOpacity={0.7}
+        >
           <Ionicons name="people" size={14} color={Colors.primary} />
           <Text style={styles.communityText}>{post.community}</Text>
-        </View>
+          <Text style={styles.joinText}>Join</Text>
+        </TouchableOpacity>
       )}
       <Text style={styles.postText}>{post.text}</Text>
       {post.location && (
@@ -408,6 +418,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     fontWeight: '600',
+  },
+  joinText: {
+    fontSize: 11,
+    color: Colors.primary,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   postText: {
     fontSize: 16,
