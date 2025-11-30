@@ -113,9 +113,9 @@ export default function SettingsScreen() {
 
         <Text style={styles.sectionTitle}>General</Text>
         <View style={styles.section}>
-          <SettingItem icon="color-palette-outline" title="Display & Theme" onPress={() => {}} />
-          <SettingItem icon="accessibility-outline" title="Accessibility" onPress={() => {}} />
-          <SettingItem icon="language-outline" title="Language" onPress={() => {}} />
+          <SettingItem icon="color-palette-outline" title="Display & Theme" onPress={() => navigation.navigate('DisplayTheme')} />
+          <SettingItem icon="accessibility-outline" title="Accessibility" onPress={() => navigation.navigate('Accessibility')} />
+          <SettingItem icon="language-outline" title="Language" onPress={() => navigation.navigate('Language')} />
         </View>
 
         <Text style={styles.sectionTitle}>About Us</Text>
@@ -132,7 +132,7 @@ export default function SettingsScreen() {
           <SettingItem
             icon="star-outline"
             title="Rate the App"
-            onPress={() => {}}
+            onPress={() => navigation.navigate('RateApp')}
             rightComponent={<Ionicons name="star" size={20} color={Colors.primary} />}
           />
         </View>
