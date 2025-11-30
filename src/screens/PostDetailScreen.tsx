@@ -103,6 +103,9 @@ export default function PostDetailScreen() {
             onQuote={() => {
               navigation.navigate('QuotePost', { post });
             }}
+            onBookmark={async () => {
+              // Bookmark updated, no action needed here
+            }}
           />
         </View>
 
@@ -135,7 +138,11 @@ export default function PostDetailScreen() {
                     comments: 0,
                     reposts: comment.reposts,
                     saved: comment.saved,
+                    time: comment.time,
                   }}
+                  isComment={true}
+                  postId={post.id}
+                  postTitle={post.text.substring(0, 50) + (post.text.length > 50 ? '...' : '')}
                   onComment={() => {
                     // Handle reply to comment
                   }}
