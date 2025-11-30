@@ -19,6 +19,24 @@ export default function PrivacySettingsScreen() {
   const [allowTagging, setAllowTagging] = useState(true);
   const [dataSharing, setDataSharing] = useState(false);
 
+  const handleSettingChange = (
+    setter: (value: boolean) => void,
+    value: boolean,
+    settingName: string,
+    enabledMessage: string,
+    disabledMessage: string
+  ) => {
+    setter(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? `${settingName} Enabled` : `${settingName} Disabled`,
+        value ? enabledMessage : disabledMessage,
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
   const SettingItem = ({
     icon,
     title,
@@ -68,14 +86,30 @@ export default function PrivacySettingsScreen() {
             title="Private Profile"
             subtitle="Only approved followers can see your posts"
             value={privateProfile}
-            onValueChange={setPrivateProfile}
+            onValueChange={(value) =>
+              handleSettingChange(
+                setPrivateProfile,
+                value,
+                'Private Profile',
+                'Your profile is now private. Only approved followers can see your posts.',
+                'Your profile is now public. Everyone can see your posts.'
+              )
+            }
           />
           <SettingItem
             icon="mail-outline"
             title="Show Email"
             subtitle="Display your email on your profile"
             value={showEmail}
-            onValueChange={setShowEmail}
+            onValueChange={(value) =>
+              handleSettingChange(
+                setShowEmail,
+                value,
+                'Show Email',
+                'Your email will now be visible on your profile.',
+                'Your email will be hidden from your profile.'
+              )
+            }
           />
           <SettingItem
             icon="mail-outline"
@@ -93,14 +127,30 @@ export default function PrivacySettingsScreen() {
             title="Show Activity Status"
             subtitle="Let others see when you're active"
             value={showActivity}
-            onValueChange={setShowActivity}
+            onValueChange={(value) =>
+              handleSettingChange(
+                setShowActivity,
+                value,
+                'Activity Status',
+                'Others can now see when you\'re active.',
+                'Your activity status is now hidden.'
+              )
+            }
           />
           <SettingItem
             icon="at-outline"
             title="Allow Tagging"
             subtitle="Let others tag you in posts"
             value={allowTagging}
-            onValueChange={setAllowTagging}
+            onValueChange={(value) =>
+              handleSettingChange(
+                setAllowTagging,
+                value,
+                'Tagging',
+                'Others can now tag you in posts.',
+                'Others can no longer tag you in posts.'
+              )
+            }
           />
         </View>
 
@@ -111,7 +161,15 @@ export default function PrivacySettingsScreen() {
             title="Data Sharing"
             subtitle="Help improve the app by sharing usage data"
             value={dataSharing}
-            onValueChange={setDataSharing}
+            onValueChange={(value) =>
+              handleSettingChange(
+                setDataSharing,
+                value,
+                'Data Sharing',
+                'You\'re helping improve Gobia by sharing usage data.',
+                'Data sharing is now disabled.'
+              )
+            }
           />
           <SettingItem
             icon="ban-outline"
