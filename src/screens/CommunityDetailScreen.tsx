@@ -5,6 +5,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -30,21 +31,29 @@ export default function CommunityDetailScreen() {
   const posts = [
     {
       id: '1',
-      author: 'Sarah Johnson',
+      name: 'Sarah Johnson',
       handle: '@sarahj',
       text: 'Just released React Native 0.81! Check out the new features and improvements.',
+      timestamp: '2h',
       time: '2h',
       likes: 89,
       comments: 15,
+      reposts: 12,
+      views: 567,
+      saved: false,
     },
     {
       id: '2',
-      author: 'Mike Davis',
+      name: 'Mike Davis',
       handle: '@miked',
       text: 'Looking for help with React Native navigation. Any experts here?',
+      timestamp: '5h',
       time: '5h',
       likes: 12,
       comments: 8,
+      reposts: 2,
+      views: 89,
+      saved: false,
     },
   ];
 
@@ -96,33 +105,32 @@ export default function CommunityDetailScreen() {
 
         <View style={styles.posts}>
           {posts.map((post) => (
-            <TouchableOpacity
-              key={post.id}
-              style={styles.post}
-              onPress={() => navigation.navigate('PostDetail', { postId: post.id })}
-            >
-              <View style={styles.postHeader}>
-                <View style={styles.postAvatar} />
-                <View style={styles.postUserInfo}>
-                  <Text style={styles.postAuthor}>{post.author}</Text>
-                  <Text style={styles.postHandle}>{post.handle} · {post.time}</Text>
+            <View key={post.id} style={styles.post}>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('PostDetail', { post })}
+              >
+                <View style={styles.postHeader}>
+                  <View style={styles.postAvatar} />
+                  <View style={styles.postUserInfo}>
+                    <Text style={styles.postAuthor}>{post.name}</Text>
+                    <Text style={styles.postHandle}>{post.handle} · {post.time}</Text>
+                  </View>
                 </View>
-              </View>
-              <Text style={styles.postText}>{post.text}</Text>
-              <View style={styles.postActions}>
-                <TouchableOpacity style={styles.postAction}>
-                  <Ionicons name="heart-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.likes}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.postAction}>
-                  <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.comments}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.postAction}>
-                  <Ionicons name="share-outline" size={18} color={Colors.textLight} />
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
+                <Text style={styles.postText}>{post.text}</Text>
+              </TouchableOpacity>
+              <PostActions
+                post={post}
+                onComment={() => navigation.navigate('PostDetail', { post })}
+                onRepost={() => {
+                  // Handle repost
+                }}
+                onQuote={() => navigation.navigate('QuotePost', { post })}
+                onBookmark={async () => {
+                  // Bookmark updated
+                }}
+              />
+            </View>
           ))}
         </View>
       </ScrollView>
