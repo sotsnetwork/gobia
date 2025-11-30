@@ -24,6 +24,7 @@ export default function FeedScreen() {
       likes: 0,
       comments: 0,
       reposts: 0,
+      views: 45,
       saved: false,
     },
     {
@@ -35,6 +36,7 @@ export default function FeedScreen() {
       likes: 12,
       comments: 3,
       reposts: 1,
+      views: 234,
       saved: false,
     },
     {
@@ -47,6 +49,7 @@ export default function FeedScreen() {
       likes: 256,
       comments: 42,
       reposts: 15,
+      views: 6600,
       saved: false,
     },
     {
@@ -59,6 +62,7 @@ export default function FeedScreen() {
       likes: 18,
       comments: 9,
       reposts: 2,
+      views: 892,
       saved: true,
     },
   ];
