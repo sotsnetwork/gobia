@@ -83,12 +83,11 @@ export default function FeedScreen() {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {posts.map((post) => (
-          <TouchableOpacity
-            key={post.id}
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('PostDetail', { post })}
-          >
-            <View style={styles.post}>
+          <View key={post.id} style={styles.post}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('PostDetail', { post })}
+            >
               <View style={styles.postHeader}>
                 <View style={styles.avatar} />
                 <View style={styles.postUserInfo}>
@@ -111,18 +110,18 @@ export default function FeedScreen() {
                   <Text style={styles.locationText}>{post.location}</Text>
                 </View>
               )}
-              <PostActions
-                post={post}
-                onComment={() => navigation.navigate('PostDetail', { post })}
-                onRepost={() => {
-                  // Handle repost
-                }}
-                onQuote={() => {
-                  navigation.navigate('QuotePost', { post });
-                }}
-              />
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+            <PostActions
+              post={post}
+              onComment={() => navigation.navigate('PostDetail', { post })}
+              onRepost={() => {
+                // Handle repost
+              }}
+              onQuote={() => {
+                navigation.navigate('QuotePost', { post });
+              }}
+            />
+          </View>
         ))}
       </ScrollView>
 
