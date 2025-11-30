@@ -55,13 +55,15 @@ export default function PostActions({
     return count.toString();
   };
 
-  const handleLike = () => {
+  const handleLike = (e?: any) => {
+    e?.stopPropagation?.();
     setLiked(!liked);
     setLikeCount(liked ? likeCount - 1 : likeCount + 1);
     onLike?.();
   };
 
-  const handleRepost = () => {
+  const handleRepost = (e?: any) => {
+    e?.stopPropagation?.();
     if (onRepost) {
       onRepost();
     } else {
@@ -71,7 +73,8 @@ export default function PostActions({
     }
   };
 
-  const handleQuote = () => {
+  const handleQuote = (e?: any) => {
+    e?.stopPropagation?.();
     if (onQuote) {
       onQuote();
     } else {
@@ -79,12 +82,19 @@ export default function PostActions({
     }
   };
 
-  const handleBookmark = () => {
+  const handleBookmark = (e?: any) => {
+    e?.stopPropagation?.();
     setBookmarked(!bookmarked);
     onBookmark?.();
   };
 
-  const handleShare = async () => {
+  const handleComment = (e?: any) => {
+    e?.stopPropagation?.();
+    onComment?.();
+  };
+
+  const handleShare = async (e?: any) => {
+    e?.stopPropagation?.();
     if (onShare) {
       onShare();
       return;
@@ -112,13 +122,23 @@ export default function PostActions({
     }
   };
 
+  const handleViews = (e?: any) => {
+    e?.stopPropagation?.();
+    // In real app, would navigate to analytics/view details
+    Alert.alert('Post Analytics', `This post has ${formatCount(views)} views.`);
+  };
+
   const iconSize = compact ? 16 : 20;
   const textSize = compact ? 12 : 14;
 
   return (
-    <View style={[styles.container, compact && styles.compactContainer]}>
+    <View style={[styles.container, compact && styles.compactContainer]} onStartShouldSetResponder={() => true}>
       {/* Comment */}
-      <TouchableOpacity style={styles.action} onPress={onComment}>
+      <TouchableOpacity 
+        style={styles.action} 
+        onPress={handleComment}
+        activeOpacity={0.7}
+      >
         <Ionicons name="chatbubble-outline" size={iconSize} color={Colors.textLight} />
         {post.comments !== undefined && post.comments > 0 && (
           <Text style={[styles.actionText, { fontSize: textSize }]}>{post.comments}</Text>
@@ -127,7 +147,11 @@ export default function PostActions({
 
       {/* Repost */}
       {showRepost && (
-        <TouchableOpacity style={styles.action} onPress={handleRepost}>
+        <TouchableOpacity 
+          style={styles.action} 
+          onPress={handleRepost}
+          activeOpacity={0.7}
+        >
           <Ionicons
             name={reposted ? 'repeat' : 'repeat-outline'}
             size={iconSize}
@@ -142,7 +166,11 @@ export default function PostActions({
       )}
 
       {/* Like */}
-      <TouchableOpacity style={styles.action} onPress={handleLike}>
+      <TouchableOpacity 
+        style={styles.action} 
+        onPress={handleLike}
+        activeOpacity={0.7}
+      >
         <Ionicons
           name={liked ? 'heart' : 'heart-outline'}
           size={iconSize}
@@ -158,10 +186,8 @@ export default function PostActions({
       {/* Views/Analytics */}
       <TouchableOpacity
         style={styles.action}
-        onPress={() => {
-          // In real app, would navigate to analytics/view details
-          Alert.alert('Post Analytics', `This post has ${formatCount(views)} views.`);
-        }}
+        onPress={handleViews}
+        activeOpacity={0.7}
       >
         <Ionicons name="stats-chart-outline" size={iconSize} color={Colors.textLight} />
         {views > 0 && (
@@ -170,7 +196,11 @@ export default function PostActions({
       </TouchableOpacity>
 
       {/* Bookmark */}
-      <TouchableOpacity style={styles.action} onPress={handleBookmark}>
+      <TouchableOpacity 
+        style={styles.action} 
+        onPress={handleBookmark}
+        activeOpacity={0.7}
+      >
         <Ionicons
           name={bookmarked ? 'bookmark' : 'bookmark-outline'}
           size={iconSize}
@@ -180,14 +210,22 @@ export default function PostActions({
 
       {/* Share */}
       {showShare && (
-        <TouchableOpacity style={styles.action} onPress={handleShare}>
+        <TouchableOpacity 
+          style={styles.action} 
+          onPress={handleShare}
+          activeOpacity={0.7}
+        >
           <Ionicons name="arrow-up-circle-outline" size={iconSize} color={Colors.textLight} />
         </TouchableOpacity>
       )}
 
       {/* Quote (hidden by default, can be shown via showQuote prop) */}
       {showQuote && (
-        <TouchableOpacity style={styles.action} onPress={handleQuote}>
+        <TouchableOpacity 
+          style={styles.action} 
+          onPress={handleQuote}
+          activeOpacity={0.7}
+        >
           <Ionicons name="chatbox-ellipses-outline" size={iconSize} color={Colors.textLight} />
         </TouchableOpacity>
       )}
