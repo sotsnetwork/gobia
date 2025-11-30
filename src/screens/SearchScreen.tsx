@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -27,6 +28,33 @@ export default function SearchScreen() {
       </TouchableOpacity>
     </View>
   );
+
+  const samplePosts = [
+    {
+      id: '1',
+      name: 'Sarah Drasner',
+      handle: '@sarah_edo',
+      text: 'Just shipped a new feature for my design tool! Check it out and let me know what you think.',
+      timestamp: '2h',
+      likes: 45,
+      comments: 12,
+      reposts: 5,
+      views: 234,
+      saved: false,
+    },
+    {
+      id: '2',
+      name: 'Dan Abramov',
+      handle: '@dan_abramov',
+      text: 'Working on something exciting with React. Can\'t wait to share it with everyone!',
+      timestamp: '5h',
+      likes: 89,
+      comments: 23,
+      reposts: 12,
+      views: 567,
+      saved: false,
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -86,10 +114,58 @@ export default function SearchScreen() {
       <ScrollView style={styles.scrollView}>
         {activeTab === 'Users' && (
           <>
-            <UserItem name="Sarah Drasner" username="@sarah_edo" following={false} />
-            <UserItem name="Dan Abramov" username="@dan_abramov" following={true} />
-            <UserItem name="Cassidy Williams" username="@cassidoo" following={false} />
-            <UserItem name="Evan You" username="@youyuxi" following={false} />
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UserProfile', { userId: '1', username: 'sarah_edo' })}
+            >
+              <UserItem name="Sarah Drasner" username="@sarah_edo" following={false} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UserProfile', { userId: '2', username: 'dan_abramov' })}
+            >
+              <UserItem name="Dan Abramov" username="@dan_abramov" following={true} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UserProfile', { userId: '3', username: 'cassidoo' })}
+            >
+              <UserItem name="Cassidy Williams" username="@cassidoo" following={false} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('UserProfile', { userId: '4', username: 'youyuxi' })}
+            >
+              <UserItem name="Evan You" username="@youyuxi" following={false} />
+            </TouchableOpacity>
+          </>
+        )}
+        {activeTab === 'Posts' && (
+          <>
+            {samplePosts.map((post) => (
+              <View key={post.id} style={styles.post}>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() => navigation.navigate('PostDetail', { post })}
+                >
+                  <View style={styles.postHeader}>
+                    <View style={styles.postAvatar} />
+                    <View style={styles.postUserInfo}>
+                      <Text style={styles.postUsername}>{post.name}</Text>
+                      <Text style={styles.postHandle}>{post.handle} · {post.timestamp}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.postText}>{post.text}</Text>
+                </TouchableOpacity>
+                <PostActions
+                  post={post}
+                  onComment={() => navigation.navigate('PostDetail', { post })}
+                  onRepost={() => {
+                    // Handle repost
+                  }}
+                  onQuote={() => navigation.navigate('QuotePost', { post })}
+                  onBookmark={async () => {
+                    // Bookmark updated
+                  }}
+                />
+              </View>
+            ))}
           </>
         )}
       </ScrollView>
@@ -226,6 +302,43 @@ const styles = StyleSheet.create({
   },
   followingButtonText: {
     color: Colors.text,
+  },
+  post: {
+    marginBottom: 16,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  postAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    marginRight: 12,
+  },
+  postUserInfo: {
+    flex: 1,
+  },
+  postUsername: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  postHandle: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
+  postText: {
+    fontSize: 16,
+    color: Colors.text,
+    lineHeight: 24,
+    marginBottom: 12,
   },
 });
 
