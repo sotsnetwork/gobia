@@ -1,5 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  TextInput, 
+  KeyboardAvoidingView, 
+  Platform, 
+  Alert,
+  Modal,
+  Animated,
+  PanResponder,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,22 +31,85 @@ interface Message {
   senderId: string;
   timestamp: string;
   isOwn: boolean;
+  reactions?: { emoji: string; userId: string }[];
+  replyTo?: {
+    id: string;
+    text: string;
+    senderId: string;
+  };
 }
+
+const QUICK_EMOJIS = ['😀', '😂', '❤️', '👍', '👎', '🔥', '🎉', '😮', '😢', '🙏'];
+const ALL_EMOJIS = [
+  '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
+  '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
+  '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩',
+  '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣',
+  '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬',
+  '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗',
+  '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯',
+  '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐',
+  '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈',
+  '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾',
+  '🤖', '🎃', '😺', '😸', '😹', '😻', '😼', '😽', '🙀', '😿',
+  '😾', '👋', '🤚', '🖐', '✋', '🖖', '👌', '🤏', '✌️', '🤞',
+  '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍',
+  '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝',
+  '🙏', '✍️', '💪', '🦾', '🦿', '🦵', '🦶', '👂', '🦻', '👃',
+  '🧠', '🦷', '🦴', '👀', '👁', '👅', '👄', '💋', '💘', '💝',
+  '💖', '💗', '💓', '💞', '💕', '💟', '❣️', '💔', '❤️', '🧡',
+  '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💯', '💢', '💥',
+  '💫', '💦', '💨', '🕳', '💣', '💬', '👤', '👥', '🗣', '👶',
+  '🧒', '👦', '👧', '🧑', '👱', '👨', '🧔', '👩', '🧓', '👴',
+  '👵', '🙍', '🙎', '🙅', '🙆', '💁', '🙋', '🧏', '🙇', '🤦',
+  '🤷', '👮', '🕵', '💂', '🥷', '👷', '🤴', '👸', '👳', '👲',
+  '🧕', '🤵', '👰', '🤰', '🤱', '👼', '🎅', '🤶', '🦸', '🦹',
+  '🧙', '🧚', '🧛', '🧜', '🧝', '🧞', '🧟', '💆', '💇', '🚶',
+  '🏃', '💃', '🕺', '🕴', '👯', '🧘', '🧗', '🤺', '🏇', '⛷',
+  '🏂', '🏌', '🏄', '🚣', '🏊', '⛹', '🏋', '🚴', '🚵', '🤸',
+  '🤼', '🤽', '🤾', '🤹', '🧗', '🛀', '🛌', '👭', '👫', '👬',
+  '💏', '💑', '👪', '👨‍👩‍👧', '👨‍👩‍👧‍👦', '👨‍👩‍👦‍👦', '👨‍👩‍👧‍👧', '👩‍👩‍👦', '👩‍👩‍👧',
+  '👩‍👩‍👧‍👦', '👩‍👩‍👦‍👦', '👩‍👩‍👧‍👧', '👨‍👨‍👦', '👨‍👨‍👧', '👨‍👨‍👧‍👦', '👨‍👨‍👦‍👦', '👨‍👨‍👧‍👧',
+  '👩‍👦', '👩‍👧', '👩‍👧‍👦', '👩‍👦‍👦', '👩‍👧‍👧', '👨‍👦', '👨‍👧', '👨‍👧‍👦', '👨‍👦‍👦', '👨‍👧‍👧',
+  '👚', '👕', '👖', '👔', '👗', '👙', '👘', '🥻', '🩱', '🩲',
+  '🩳', '👠', '👡', '👢', '👞', '👟', '🥾', '🥿', '🧦', '🧤',
+  '🧣', '🎩', '🧢', '👒', '🎓', '⛑', '🪖', '👑', '💍', '👝',
+  '👛', '👜', '💼', '🎒', '🧳', '☂️', '🌂', '💄', '💅', '💇',
+  '🔥', '💧', '🌊', '🎄', '✨', '⭐', '🌟', '💫', '⚡', '☄️',
+  '💥', '🔥', '🌪', '🌈', '☀️', '🌤', '⛅', '🌥', '☁️', '🌦',
+  '🌧', '⛈', '🌩', '⚡', '☔', '⛄', '❄️', '🌨', '💨', '🌪',
+  '🌫', '🌊', '💧', '💦', '☂️', '☔', '⛱', '🌂', '🏔', '⛰',
+  '🌋', '🗻', '🏕', '⛺', '🏠', '🏡', '🏘', '🏚', '🏗', '🏭',
+  '🏢', '🏬', '🏣', '🏤', '🏥', '🏦', '🏨', '🏪', '🏫', '🏩',
+  '💒', '🏛', '⛪', '🕌', '🕍', '🕋', '⛩', '🛤', '🛣', '🗾',
+  '🎑', '🏞', '🌅', '🌄', '🌠', '🎇', '🎆', '🌇', '🌆', '🏙',
+  '🌃', '🌌', '🌉', '🌁', '🎆', '🎇', '🎆', '🎇', '🎆', '🎇',
+];
+
+const MAX_MESSAGE_LENGTH = 500;
+const SWIPE_THRESHOLD = 50;
 
 export default function ChatScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RoutePropType>();
   const { chatId, userName } = route.params || {};
   const [message, setMessage] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showQuickEmojis, setShowQuickEmojis] = useState(false);
+  const [selectedMessageForReaction, setSelectedMessageForReaction] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const panResponderRefs = useRef<{ [key: string]: any }>({});
+  const swipeAnimations = useRef<{ [key: string]: Animated.Value }>({});
 
-  const messages: Message[] = [
+  const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       text: 'Hey! I saw your post about the AI tool. Would love to collaborate!',
       senderId: 'other',
       timestamp: '10:30 AM',
       isOwn: false,
+      reactions: [],
     },
     {
       id: '2',
@@ -40,6 +117,7 @@ export default function ChatScreen() {
       senderId: 'me',
       timestamp: '10:32 AM',
       isOwn: true,
+      reactions: [],
     },
     {
       id: '3',
@@ -47,15 +125,127 @@ export default function ChatScreen() {
       senderId: 'other',
       timestamp: '10:35 AM',
       isOwn: false,
+      reactions: [],
     },
-  ];
+  ]);
+
+  // Initialize swipe animations for each message
+  useEffect(() => {
+    messages.forEach((msg) => {
+      if (!swipeAnimations.current[msg.id]) {
+        swipeAnimations.current[msg.id] = new Animated.Value(0);
+      }
+    });
+  }, [messages]);
 
   const handleSend = () => {
     if (message.trim()) {
-      // In real app, send message to backend
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text: message.trim(),
+        senderId: 'me',
+        timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        isOwn: true,
+        reactions: [],
+        replyTo: replyingTo || undefined,
+      };
+      setMessages([...messages, newMessage]);
       setMessage('');
+      setReplyingTo(null);
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage((prev) => prev + emoji);
+    setShowEmojiPicker(false);
+    setShowQuickEmojis(false);
+  };
+
+  const handleMessageReaction = (messageId: string, emoji: string) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => {
+        if (msg.id === messageId) {
+          const existingReactions = msg.reactions || [];
+          const userReactionIndex = existingReactions.findIndex((r) => r.userId === 'me');
+          
+          if (userReactionIndex >= 0) {
+            // Remove existing reaction
+            const updatedReactions = existingReactions.filter((_, i) => i !== userReactionIndex);
+            return { ...msg, reactions: updatedReactions };
+          } else {
+            // Add new reaction
+            return {
+              ...msg,
+              reactions: [...existingReactions, { emoji, userId: 'me' }],
+            };
+          }
+        }
+        return msg;
+      })
+    );
+    setSelectedMessageForReaction(null);
+  };
+
+  const handleLongPress = (msg: Message) => {
+    setSelectedMessageForReaction(msg.id);
+  };
+
+  const handleSwipeToReply = (msg: Message) => {
+    setReplyingTo(msg);
+    // Scroll to input area
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
+  // Create PanResponder for swipe to reply
+  const createPanResponder = (msg: Message) => {
+    if (panResponderRefs.current[msg.id]) {
+      return panResponderRefs.current[msg.id];
+    }
+
+    const panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only respond to horizontal swipes
+        return Math.abs(gestureState.dx) > Math.abs(gestureState.dy) && Math.abs(gestureState.dx) > 10;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (msg.isOwn) {
+          // Swipe left for own messages
+          if (gestureState.dx < 0) {
+            const translateX = Math.max(gestureState.dx, -100);
+            swipeAnimations.current[msg.id]?.setValue(translateX);
+          }
+        } else {
+          // Swipe right for other messages
+          if (gestureState.dx > 0) {
+            const translateX = Math.min(gestureState.dx, 100);
+            swipeAnimations.current[msg.id]?.setValue(translateX);
+          }
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const threshold = SWIPE_THRESHOLD;
+        if (msg.isOwn && gestureState.dx < -threshold) {
+          // Swiped left enough to reply
+          handleSwipeToReply(msg);
+        } else if (!msg.isOwn && gestureState.dx > threshold) {
+          // Swiped right enough to reply
+          handleSwipeToReply(msg);
+        }
+        
+        // Animate back to original position
+        Animated.spring(swipeAnimations.current[msg.id], {
+          toValue: 0,
+          useNativeDriver: true,
+        }).start();
+      },
+    });
+
+    panResponderRefs.current[msg.id] = panResponder;
+    return panResponder;
   };
 
   useEffect(() => {
@@ -67,8 +257,7 @@ export default function ChatScreen() {
       <Header
         title={userName || 'Chat'}
         rightIcon={
-          <TouchableOpacity onPress={() => navigation.navigate('UserProfile', { userId: chatId || '1', username: userName })}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate('UserProfile', { userId: chatId || '1', username: userName })}>
             <Ionicons name="person-outline" size={24} color={Colors.text} />
           </TouchableOpacity>
         }
@@ -84,20 +273,94 @@ export default function ChatScreen() {
           style={styles.messagesContainer}
           contentContainerStyle={styles.messagesContent}
         >
-          {messages.map((msg) => (
-            <View
-              key={msg.id}
-              style={[styles.messageBubble, msg.isOwn ? styles.ownMessage : styles.otherMessage]}
-            >
-              <Text style={[styles.messageText, msg.isOwn && styles.ownMessageText]}>
-                {msg.text}
-              </Text>
-              <Text style={[styles.timestamp, msg.isOwn && styles.ownTimestamp]}>
-                {msg.timestamp}
-              </Text>
-            </View>
-          ))}
+          {messages.map((msg) => {
+            const panResponder = createPanResponder(msg);
+            const translateX = swipeAnimations.current[msg.id] || new Animated.Value(0);
+
+            return (
+              <Animated.View
+                key={msg.id}
+                style={[
+                  styles.messageWrapper,
+                  {
+                    transform: [{ translateX }],
+                  },
+                ]}
+                {...panResponder.panHandlers}
+              >
+                {replyingTo?.id === msg.id && (
+                  <View style={styles.replyIndicator}>
+                    <Ionicons name="arrow-back" size={16} color={Colors.primary} />
+                    <Text style={styles.replyIndicatorText}>Replying to this message</Text>
+                  </View>
+                )}
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onLongPress={() => handleLongPress(msg)}
+                  style={[styles.messageBubble, msg.isOwn ? styles.ownMessage : styles.otherMessage]}
+                >
+                  {msg.replyTo && (
+                    <View style={styles.replyPreview}>
+                      <View style={styles.replyPreviewLine} />
+                      <View style={styles.replyPreviewContent}>
+                        <Text style={styles.replyPreviewSender}>
+                          {msg.replyTo.senderId === 'me' ? 'You' : userName || 'User'}
+                        </Text>
+                        <Text style={styles.replyPreviewText} numberOfLines={1}>
+                          {msg.replyTo.text}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  <Text style={[styles.messageText, msg.isOwn && styles.ownMessageText]}>
+                    {msg.text}
+                  </Text>
+                  <View style={styles.messageFooter}>
+                    <Text style={[styles.timestamp, msg.isOwn && styles.ownTimestamp]}>
+                      {msg.timestamp}
+                    </Text>
+                    {msg.reactions && msg.reactions.length > 0 && (
+                      <View style={styles.reactionsContainer}>
+                        {msg.reactions.map((reaction, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={styles.reactionBadge}
+                            onPress={() => handleMessageReaction(msg.id, reaction.emoji)}
+                          >
+                            <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
         </ScrollView>
+
+        {/* Reply Preview */}
+        {replyingTo && (
+          <View style={styles.replyPreviewBar}>
+            <View style={styles.replyPreviewBarContent}>
+              <View style={styles.replyPreviewBarLine} />
+              <View style={styles.replyPreviewBarText}>
+                <Text style={styles.replyPreviewBarLabel}>
+                  Replying to {replyingTo.isOwn ? 'yourself' : userName || 'User'}
+                </Text>
+                <Text style={styles.replyPreviewBarMessage} numberOfLines={1}>
+                  {replyingTo.text}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => setReplyingTo(null)}
+                style={styles.replyPreviewBarClose}
+              >
+                <Ionicons name="close" size={20} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View style={styles.inputContainer}>
           <TouchableOpacity
@@ -112,15 +375,29 @@ export default function ChatScreen() {
           >
             <Ionicons name="attach-outline" size={24} color={Colors.textLight} />
           </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-            placeholderTextColor={Colors.textLight}
-            value={message}
-            onChangeText={setMessage}
-            multiline
-            maxLength={500}
-          />
+          
+          <TouchableOpacity
+            style={styles.emojiButton}
+            onPress={() => setShowQuickEmojis(!showQuickEmojis)}
+          >
+            <Ionicons name="happy-outline" size={24} color={Colors.textLight} />
+          </TouchableOpacity>
+
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message..."
+              placeholderTextColor={Colors.textLight}
+              value={message}
+              onChangeText={setMessage}
+              multiline
+              maxLength={MAX_MESSAGE_LENGTH}
+            />
+            <Text style={styles.characterCount}>
+              {message.length}/{MAX_MESSAGE_LENGTH}
+            </Text>
+          </View>
+
           <TouchableOpacity
             style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
             onPress={handleSend}
@@ -133,7 +410,95 @@ export default function ChatScreen() {
             />
           </TouchableOpacity>
         </View>
+
+        {/* Quick Emojis */}
+        {showQuickEmojis && (
+          <View style={styles.quickEmojisContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {QUICK_EMOJIS.map((emoji, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.quickEmojiButton}
+                  onPress={() => handleEmojiSelect(emoji)}
+                >
+                  <Text style={styles.quickEmoji}>{emoji}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={styles.quickEmojiButton}
+                onPress={() => {
+                  setShowQuickEmojis(false);
+                  setShowEmojiPicker(true);
+                }}
+              >
+                <Ionicons name="add-circle-outline" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        )}
       </KeyboardAvoidingView>
+
+      {/* Full Emoji Picker Modal */}
+      <Modal
+        visible={showEmojiPicker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEmojiPicker(false)}
+      >
+        <View style={styles.emojiModalOverlay}>
+          <View style={styles.emojiModalContent}>
+            <View style={styles.emojiModalHeader}>
+              <Text style={styles.emojiModalTitle}>Select Emoji</Text>
+              <TouchableOpacity onPress={() => setShowEmojiPicker(false)}>
+                <Ionicons name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.emojiModalScroll}>
+              <View style={styles.emojiGrid}>
+                {ALL_EMOJIS.map((emoji, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.emojiItem}
+                    onPress={() => handleEmojiSelect(emoji)}
+                  >
+                    <Text style={styles.emojiText}>{emoji}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Reaction Picker Modal */}
+      <Modal
+        visible={selectedMessageForReaction !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedMessageForReaction(null)}
+      >
+        <TouchableOpacity
+          style={styles.reactionModalOverlay}
+          activeOpacity={1}
+          onPress={() => setSelectedMessageForReaction(null)}
+        >
+          <View style={styles.reactionPicker}>
+            {QUICK_EMOJIS.map((emoji, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.reactionEmojiButton}
+                onPress={() => {
+                  if (selectedMessageForReaction) {
+                    handleMessageReaction(selectedMessageForReaction, emoji);
+                  }
+                }}
+              >
+                <Text style={styles.reactionEmojiText}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -153,11 +518,13 @@ const styles = StyleSheet.create({
   messagesContent: {
     paddingBottom: 16,
   },
+  messageWrapper: {
+    marginBottom: 12,
+  },
   messageBubble: {
     maxWidth: '75%',
     padding: 12,
     borderRadius: 16,
-    marginBottom: 12,
   },
   ownMessage: {
     alignSelf: 'flex-end',
@@ -171,6 +538,31 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     borderBottomLeftRadius: 4,
   },
+  replyPreview: {
+    flexDirection: 'row',
+    marginBottom: 8,
+    paddingLeft: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary,
+  },
+  replyPreviewLine: {
+    width: 3,
+    backgroundColor: Colors.primary,
+    marginRight: 8,
+  },
+  replyPreviewContent: {
+    flex: 1,
+  },
+  replyPreviewSender: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  replyPreviewText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
   messageText: {
     fontSize: 16,
     color: Colors.text,
@@ -180,13 +572,77 @@ const styles = StyleSheet.create({
   ownMessageText: {
     color: Colors.white,
   },
+  messageFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+  },
   timestamp: {
     fontSize: 11,
     color: Colors.textLight,
-    alignSelf: 'flex-end',
   },
   ownTimestamp: {
-    color: Colors.white + 'CC',
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  reactionsContainer: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  reactionBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  reactionEmoji: {
+    fontSize: 14,
+  },
+  replyIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingLeft: 8,
+  },
+  replyIndicatorText: {
+    fontSize: 12,
+    color: Colors.primary,
+    marginLeft: 4,
+  },
+  replyPreviewBar: {
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+  },
+  replyPreviewBarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  replyPreviewBarLine: {
+    width: 3,
+    height: 40,
+    backgroundColor: Colors.primary,
+    marginRight: 12,
+    borderRadius: 2,
+  },
+  replyPreviewBarText: {
+    flex: 1,
+  },
+  replyPreviewBarLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  replyPreviewBarMessage: {
+    fontSize: 14,
+    color: Colors.text,
+  },
+  replyPreviewBarClose: {
+    padding: 4,
+    marginLeft: 8,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -200,16 +656,30 @@ const styles = StyleSheet.create({
   attachButton: {
     padding: 8,
   },
-  input: {
+  emojiButton: {
+    padding: 8,
+  },
+  inputWrapper: {
     flex: 1,
+    position: 'relative',
+  },
+  input: {
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
+    paddingBottom: 28,
     fontSize: 16,
     color: Colors.text,
     maxHeight: 100,
+  },
+  characterCount: {
+    position: 'absolute',
+    bottom: 8,
+    right: 12,
+    fontSize: 11,
+    color: Colors.textLight,
   },
   sendButton: {
     width: 40,
@@ -222,5 +692,89 @@ const styles = StyleSheet.create({
   sendButtonDisabled: {
     backgroundColor: Colors.borderLight,
   },
+  quickEmojisContainer: {
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+    paddingVertical: 8,
+    maxHeight: 60,
+  },
+  quickEmojiButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 4,
+  },
+  quickEmoji: {
+    fontSize: 28,
+  },
+  emojiModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  emojiModalContent: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '60%',
+  },
+  emojiModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  emojiModalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  emojiModalScroll: {
+    maxHeight: 400,
+  },
+  emojiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 8,
+  },
+  emojiItem: {
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emojiText: {
+    fontSize: 32,
+  },
+  reactionModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reactionPicker: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderRadius: 30,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  reactionEmojiButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 2,
+  },
+  reactionEmojiText: {
+    fontSize: 28,
+  },
 });
-
