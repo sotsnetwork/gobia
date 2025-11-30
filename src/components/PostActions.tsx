@@ -13,6 +13,7 @@ interface PostActionsProps {
     comments?: number;
     reposts?: number;
     boosts?: number;
+    views?: number;
     saved?: boolean;
   };
   onLike?: () => void;
@@ -37,7 +38,7 @@ export default function PostActions({
   onShare,
   showShare = true,
   showRepost = true,
-  showQuote = true,
+  showQuote = false,
   compact = false,
 }: PostActionsProps) {
   const [liked, setLiked] = useState(false);
@@ -45,6 +46,14 @@ export default function PostActions({
   const [bookmarked, setBookmarked] = useState(post.saved || false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   const [repostCount, setRepostCount] = useState(post.reposts || post.boosts || 0);
+  const views = post.views || 0;
+
+  const formatCount = (count: number): string => {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'K';
+    }
+    return count.toString();
+  };
 
   const handleLike = () => {
     setLiked(!liked);
@@ -103,24 +112,12 @@ export default function PostActions({
     }
   };
 
-  const iconSize = compact ? 16 : 18;
+  const iconSize = compact ? 16 : 20;
   const textSize = compact ? 12 : 14;
 
   return (
     <View style={[styles.container, compact && styles.compactContainer]}>
-      <TouchableOpacity style={styles.action} onPress={handleLike}>
-        <Ionicons
-          name={liked ? 'heart' : 'heart-outline'}
-          size={iconSize}
-          color={liked ? Colors.error : Colors.textLight}
-        />
-        {likeCount > 0 && (
-          <Text style={[styles.actionText, liked && styles.likedText, { fontSize: textSize }]}>
-            {likeCount}
-          </Text>
-        )}
-      </TouchableOpacity>
-
+      {/* Comment */}
       <TouchableOpacity style={styles.action} onPress={onComment}>
         <Ionicons name="chatbubble-outline" size={iconSize} color={Colors.textLight} />
         {post.comments !== undefined && post.comments > 0 && (
@@ -128,6 +125,7 @@ export default function PostActions({
         )}
       </TouchableOpacity>
 
+      {/* Repost */}
       {showRepost && (
         <TouchableOpacity style={styles.action} onPress={handleRepost}>
           <Ionicons
@@ -143,18 +141,29 @@ export default function PostActions({
         </TouchableOpacity>
       )}
 
-      {showQuote && (
-        <TouchableOpacity style={styles.action} onPress={handleQuote}>
-          <Ionicons name="chatbox-ellipses-outline" size={iconSize} color={Colors.textLight} />
-        </TouchableOpacity>
-      )}
+      {/* Like */}
+      <TouchableOpacity style={styles.action} onPress={handleLike}>
+        <Ionicons
+          name={liked ? 'heart' : 'heart-outline'}
+          size={iconSize}
+          color={liked ? Colors.error : Colors.textLight}
+        />
+        {likeCount > 0 && (
+          <Text style={[styles.actionText, liked && styles.likedText, { fontSize: textSize }]}>
+            {likeCount}
+          </Text>
+        )}
+      </TouchableOpacity>
 
-      {showShare && (
-        <TouchableOpacity style={styles.action} onPress={handleShare}>
-          <Ionicons name="share-outline" size={iconSize} color={Colors.textLight} />
-        </TouchableOpacity>
-      )}
+      {/* Views/Analytics */}
+      <TouchableOpacity style={styles.action}>
+        <Ionicons name="stats-chart-outline" size={iconSize} color={Colors.textLight} />
+        {views > 0 && (
+          <Text style={[styles.actionText, { fontSize: textSize }]}>{formatCount(views)}</Text>
+        )}
+      </TouchableOpacity>
 
+      {/* Bookmark */}
       <TouchableOpacity style={styles.action} onPress={handleBookmark}>
         <Ionicons
           name={bookmarked ? 'bookmark' : 'bookmark-outline'}
@@ -162,6 +171,20 @@ export default function PostActions({
           color={bookmarked ? Colors.primary : Colors.textLight}
         />
       </TouchableOpacity>
+
+      {/* Share */}
+      {showShare && (
+        <TouchableOpacity style={styles.action} onPress={handleShare}>
+          <Ionicons name="arrow-up-circle-outline" size={iconSize} color={Colors.textLight} />
+        </TouchableOpacity>
+      )}
+
+      {/* Quote (hidden by default, can be shown via showQuote prop) */}
+      {showQuote && (
+        <TouchableOpacity style={styles.action} onPress={handleQuote}>
+          <Ionicons name="chatbox-ellipses-outline" size={iconSize} color={Colors.textLight} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -172,17 +195,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 8,
+    paddingVertical: 4,
   },
   compactContainer: {
-    gap: 12,
+    gap: 16,
   },
   action: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    minWidth: 40,
   },
   actionText: {
     color: Colors.textLight,
+    fontWeight: '400',
   },
   likedText: {
     color: Colors.error,
@@ -191,4 +217,3 @@ const styles = StyleSheet.create({
     color: Colors.success,
   },
 });
-
