@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-screens';
 
 import { RootStackParamList } from './src/types/navigation';
+import * as AuthService from './src/services/authService';
 
 // Auth Screens
 import WelcomeScreen from './src/screens/WelcomeScreen';
@@ -137,14 +138,60 @@ const errorStyles = StyleSheet.create({
   },
 });
 
+const loadingStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  text: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666666',
+  },
+});
+
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const loggedIn = await AuthService.isLoggedIn();
+      setIsAuthenticated(loggedIn);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <ErrorBoundary>
+        <SafeAreaProvider>
+          <View style={loadingStyles.container}>
+            <ActivityIndicator size="large" color="#C0561F" />
+            <Text style={loadingStyles.text}>Loading...</Text>
+          </View>
+        </SafeAreaProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
         <NavigationContainer>
           <StatusBar style="auto" />
           <Stack.Navigator
-            initialRouteName="MainTabs"
+            initialRouteName={isAuthenticated ? 'MainTabs' : 'Welcome'}
             screenOptions={{
               headerShown: false,
               animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
