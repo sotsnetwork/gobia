@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -100,7 +100,16 @@ export default function ChatScreen() {
         </ScrollView>
 
         <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.attachButton}>
+          <TouchableOpacity
+            style={styles.attachButton}
+            onPress={() => {
+              Alert.alert('Attach File', 'Choose an option', [
+                { text: 'Photo', onPress: () => Alert.alert('Coming Soon', 'Photo attachment will be available soon') },
+                { text: 'Document', onPress: () => Alert.alert('Coming Soon', 'Document attachment will be available soon') },
+                { text: 'Cancel', style: 'cancel' },
+              ]);
+            }}
+          >
             <Ionicons name="attach-outline" size={24} color={Colors.textLight} />
           </TouchableOpacity>
           <TextInput
