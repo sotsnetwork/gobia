@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -56,27 +57,61 @@ export default function MyProfileScreen() {
 
         <View style={styles.posts}>
           <View style={styles.post}>
-            <View style={styles.postHeader}>
-              <View style={styles.postAvatar} />
-              <View style={styles.postUserInfo}>
-                <Text style={styles.postUsername}>Jane Doe</Text>
-                <Text style={styles.postHandle}>@jane_doe · 2h</Text>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => navigation.navigate('PostDetail', {
+                post: {
+                  id: 'profile-post-1',
+                  name: 'Jane Doe',
+                  handle: '@jane_doe',
+                  text: "Just shipped a new feature for @CoolApp! It's a real-time collaboration tool built with Firebase. What do you all think? #React #Firebase",
+                  timestamp: '2h',
+                  likes: 15,
+                  comments: 4,
+                  reposts: 0,
+                  views: 120,
+                  saved: false,
+                }
+              })}
+            >
+              <View style={styles.postHeader}>
+                <View style={styles.postAvatar} />
+                <View style={styles.postUserInfo}>
+                  <Text style={styles.postUsername}>Jane Doe</Text>
+                  <Text style={styles.postHandle}>@jane_doe · 2h</Text>
+                </View>
               </View>
-            </View>
-            <Text style={styles.postText}>
-              Just shipped a new feature for @CoolApp! It's a real-time collaboration tool built with Firebase. What do you all think? #React #Firebase
-            </Text>
-            <View style={styles.postActions}>
-              <View style={styles.postAction}>
-                <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-                <Text style={styles.postActionText}>4</Text>
-              </View>
-              <View style={styles.postAction}>
-                <Ionicons name="heart-outline" size={18} color={Colors.textLight} />
-                <Text style={styles.postActionText}>15</Text>
-              </View>
-              <Ionicons name="bookmark-outline" size={18} color={Colors.textLight} />
-            </View>
+              <Text style={styles.postText}>
+                Just shipped a new feature for @CoolApp! It's a real-time collaboration tool built with Firebase. What do you all think? #React #Firebase
+              </Text>
+            </TouchableOpacity>
+            <PostActions
+              post={{
+                id: 'profile-post-1',
+                name: 'Jane Doe',
+                handle: '@jane_doe',
+                text: "Just shipped a new feature for @CoolApp! It's a real-time collaboration tool built with Firebase. What do you all think? #React #Firebase",
+                likes: 15,
+                comments: 4,
+                reposts: 0,
+                views: 120,
+                saved: false,
+              }}
+              onComment={() => navigation.navigate('PostDetail', {
+                post: {
+                  id: 'profile-post-1',
+                  name: 'Jane Doe',
+                  handle: '@jane_doe',
+                  text: "Just shipped a new feature for @CoolApp! It's a real-time collaboration tool built with Firebase. What do you all think? #React #Firebase",
+                  timestamp: '2h',
+                  likes: 15,
+                  comments: 4,
+                  reposts: 0,
+                  views: 120,
+                  saved: false,
+                }
+              })}
+            />
           </View>
         </View>
       </ScrollView>
