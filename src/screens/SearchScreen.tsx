@@ -53,7 +53,10 @@ export default function SearchScreen() {
           <Ionicons name="options-outline" size={20} color={Colors.primary} />
           <Text style={styles.filterText}>Advanced Filters</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterItem}>
+        <TouchableOpacity
+          style={styles.filterItem}
+          onPress={() => navigation.navigate('AdvancedUserSearch')}
+        >
           <Ionicons name="people-outline" size={20} color={Colors.text} />
           <Text style={styles.findUsersText}>Find Users</Text>
         </TouchableOpacity>
