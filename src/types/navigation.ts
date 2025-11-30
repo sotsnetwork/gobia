@@ -42,6 +42,10 @@ export type RootStackParamList = {
   ChangePassword: undefined;
   EmailAddress: undefined;
   ConnectedAccounts: undefined;
+  DisplayTheme: undefined;
+  Accessibility: undefined;
+  Language: undefined;
+  RateApp: undefined;
   
   // Support
   HelpSupport: undefined;
