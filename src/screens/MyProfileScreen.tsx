@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as AuthService from '../services/authService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -193,9 +194,16 @@ export default function MyProfileScreen() {
                     {
                       text: 'Log Out',
                       style: 'destructive',
-                      onPress: () => {
-                        // In real app, would clear auth state and navigate to Welcome
-                        navigation.navigate('Welcome');
+                      onPress: async () => {
+                        try {
+                          await AuthService.logout();
+                          navigation.reset({
+                            index: 0,
+                            routes: [{ name: 'Welcome' }],
+                          });
+                        } catch (error) {
+                          Alert.alert('Error', 'Failed to log out. Please try again.');
+                        }
                       },
                     },
                   ]
