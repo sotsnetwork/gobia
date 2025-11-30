@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Share } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,6 +18,8 @@ export default function UserProfileScreen() {
   const { userId, username } = route.params || {};
   const [following, setFollowing] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   // Sample user data - in real app, fetch by userId
   const user = {
@@ -57,10 +59,46 @@ export default function UserProfileScreen() {
   };
 
   const handleReport = () => {
+    setShowMenu(false);
     Alert.alert('Report User', `Report ${user.name} for inappropriate behavior?`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Report', style: 'destructive', onPress: () => navigation.navigate('ReportIssue') },
     ]);
+  };
+
+  const handleMute = () => {
+    setShowMenu(false);
+    Alert.alert(
+      muted ? 'Unmute User' : 'Mute User',
+      muted
+        ? `Unmute ${user.name}? You will see their posts in your feed again.`
+        : `Mute ${user.name}? You won't see their posts in your feed, but they can still see yours.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: muted ? 'Unmute' : 'Mute',
+          onPress: () => {
+            setMuted(!muted);
+            Alert.alert('Success', `${user.name} has been ${muted ? 'unmuted' : 'muted'}.`);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleShareProfile = async () => {
+    setShowMenu(false);
+    try {
+      const result = await Share.share({
+        message: `Check out ${user.name}'s profile on Gobia: ${user.username}`,
+        title: `${user.name}'s Profile`,
+      });
+      if (result.action === Share.sharedAction) {
+        Alert.alert('Success', 'Profile shared successfully!');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share profile.');
+    }
   };
 
   const posts = [
@@ -115,13 +153,7 @@ export default function UserProfileScreen() {
       <Header
         title={user.name}
         rightIcon={<Ionicons name="ellipsis-vertical" size={24} color={Colors.text} />}
-        onRightPress={() => {
-          Alert.alert('Options', '', [
-            { text: 'Report', onPress: handleReport, style: 'destructive' },
-            { text: 'Block', onPress: handleBlock, style: 'destructive' },
-            { text: 'Cancel', style: 'cancel' },
-          ]);
-        }}
+        onRightPress={() => setShowMenu(true)}
       />
 
       <ScrollView style={styles.scrollView}>
@@ -214,6 +246,67 @@ export default function UserProfileScreen() {
           ))}
         </View>
       </ScrollView>
+
+      {/* Options Menu Modal */}
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <View style={styles.menuHandle} />
+            
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleShareProfile}
+            >
+              <Ionicons name="share-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Share Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleMute}
+            >
+              <Ionicons name={muted ? "volume-high-outline" : "volume-mute-outline"} size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>{muted ? 'Unmute' : 'Mute'} User</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleReport}
+            >
+              <Ionicons name="flag-outline" size={24} color={Colors.error} />
+              <Text style={[styles.menuItemText, styles.destructiveText]}>Report Account</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleBlock}
+            >
+              <Ionicons name="ban-outline" size={24} color={Colors.error} />
+              <Text style={[styles.menuItemText, styles.destructiveText]}>Block Account</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => setShowMenu(false)}
+            >
+              <Text style={styles.menuItemText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -404,6 +497,46 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 32,
+    paddingTop: 8,
+  },
+  menuHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: Colors.text,
+    marginLeft: 12,
+  },
+  destructiveText: {
+    color: Colors.error,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+    marginVertical: 4,
   },
 });
 
