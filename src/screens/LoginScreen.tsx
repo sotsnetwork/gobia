@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import Button from '../components/Button';
 import Logo from '../components/Logo';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as AuthService from '../services/authService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -63,7 +64,31 @@ export default function LoginScreen() {
 
           <Button
             title="Log In"
-            onPress={() => navigation.navigate('MainTabs')}
+            onPress={async () => {
+              if (!email.trim() || !password.trim()) {
+                Alert.alert('Error', 'Please enter your email and password');
+                return;
+              }
+              
+              try {
+                // In a real app, you would validate credentials with your backend
+                // For now, we'll just save the login state
+                const userData: AuthService.UserData = {
+                  id: Date.now().toString(),
+                  email: email.trim(),
+                  name: email.split('@')[0], // Simple name extraction
+                  handle: `@${email.split('@')[0]}`,
+                };
+                
+                await AuthService.login(userData);
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'MainTabs' }],
+                });
+              } catch (error) {
+                Alert.alert('Error', 'Failed to log in. Please try again.');
+              }
+            }}
           />
 
           <TouchableOpacity
