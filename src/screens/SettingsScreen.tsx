@@ -229,9 +229,16 @@ export default function SettingsScreen() {
                 {
                   text: 'Log Out',
                   style: 'destructive',
-                  onPress: () => {
-                    // In real app, would clear auth state and navigate to Welcome
-                    navigation.navigate('Welcome');
+                  onPress: async () => {
+                    try {
+                      await AuthService.logout();
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Welcome' }],
+                      });
+                    } catch (error) {
+                      Alert.alert('Error', 'Failed to log out. Please try again.');
+                    }
                   },
                 },
               ]
