@@ -156,7 +156,13 @@ export default function PostActions({
       </TouchableOpacity>
 
       {/* Views/Analytics */}
-      <TouchableOpacity style={styles.action}>
+      <TouchableOpacity
+        style={styles.action}
+        onPress={() => {
+          // In real app, would navigate to analytics/view details
+          Alert.alert('Post Analytics', `This post has ${formatCount(views)} views.`);
+        }}
+      >
         <Ionicons name="stats-chart-outline" size={iconSize} color={Colors.textLight} />
         {views > 0 && (
           <Text style={[styles.actionText, { fontSize: textSize }]}>{formatCount(views)}</Text>
