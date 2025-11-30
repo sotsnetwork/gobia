@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -21,6 +21,19 @@ export default function NotificationSettingsScreen() {
   const [messages, setMessages] = useState(true);
   const [communityPosts, setCommunityPosts] = useState(true);
   const [collaborations, setCollaborations] = useState(true);
+
+  const handleNotificationChange = (
+    setter: (value: boolean) => void,
+    value: boolean,
+    settingName: string
+  ) => {
+    setter(value);
+    // Simulate API call
+    setTimeout(() => {
+      // Show brief feedback (could use a toast library in production)
+      // For now, we'll just update the state which provides visual feedback
+    }, 100);
+  };
 
   const SettingItem = ({
     icon,
@@ -60,14 +73,14 @@ export default function NotificationSettingsScreen() {
             title="Push Notifications"
             subtitle="Receive notifications on your device"
             value={pushNotifications}
-            onValueChange={setPushNotifications}
+            onValueChange={(value) => handleNotificationChange(setPushNotifications, value, 'Push Notifications')}
           />
           <SettingItem
             icon="mail-outline"
             title="Email Notifications"
             subtitle="Receive notifications via email"
             value={emailNotifications}
-            onValueChange={setEmailNotifications}
+            onValueChange={(value) => handleNotificationChange(setEmailNotifications, value, 'Email Notifications')}
           />
         </View>
 
@@ -78,49 +91,49 @@ export default function NotificationSettingsScreen() {
             title="Likes"
             subtitle="When someone likes your post"
             value={likes}
-            onValueChange={setLikes}
+            onValueChange={(value) => handleNotificationChange(setLikes, value, 'Likes')}
           />
           <SettingItem
             icon="chatbubble-outline"
             title="Comments"
             subtitle="When someone comments on your post"
             value={comments}
-            onValueChange={setComments}
+            onValueChange={(value) => handleNotificationChange(setComments, value, 'Comments')}
           />
           <SettingItem
             icon="at-outline"
             title="Mentions"
             subtitle="When someone mentions you"
             value={mentions}
-            onValueChange={setMentions}
+            onValueChange={(value) => handleNotificationChange(setMentions, value, 'Mentions')}
           />
           <SettingItem
             icon="person-add-outline"
             title="New Followers"
             subtitle="When someone follows you"
             value={follows}
-            onValueChange={setFollows}
+            onValueChange={(value) => handleNotificationChange(setFollows, value, 'New Followers')}
           />
           <SettingItem
             icon="mail-outline"
             title="Messages"
             subtitle="When you receive a new message"
             value={messages}
-            onValueChange={setMessages}
+            onValueChange={(value) => handleNotificationChange(setMessages, value, 'Messages')}
           />
           <SettingItem
             icon="people-outline"
             title="Community Posts"
             subtitle="New posts in communities you follow"
             value={communityPosts}
-            onValueChange={setCommunityPosts}
+            onValueChange={(value) => handleNotificationChange(setCommunityPosts, value, 'Community Posts')}
           />
           <SettingItem
             icon="handshake-outline"
             title="Collaboration Requests"
             subtitle="When someone requests to collaborate"
             value={collaborations}
-            onValueChange={setCollaborations}
+            onValueChange={(value) => handleNotificationChange(setCollaborations, value, 'Collaboration Requests')}
           />
         </View>
       </ScrollView>
