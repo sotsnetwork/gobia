@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,9 +11,10 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [pushNotifications, setPushNotifications] = React.useState(true);
-  const [emailNotifications, setEmailNotifications] = React.useState(false);
-  const [privateProfile, setPrivateProfile] = React.useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pushNotifications, setPushNotifications] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(false);
+  const [privateProfile, setPrivateProfile] = useState(false);
 
   const SettingItem = ({ 
     icon, 
@@ -46,15 +47,21 @@ export default function SettingsScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={20} color={Colors.textLight} />
-          <Text style={styles.searchPlaceholder}>Search settings</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search settings"
+            placeholderTextColor={Colors.textLight}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
         </View>
 
         <Text style={styles.sectionTitle}>Account Settings</Text>
         <View style={styles.section}>
-          <SettingItem icon="person-outline" title="Edit Profile" onPress={() => {}} />
-          <SettingItem icon="lock-closed-outline" title="Change Password" onPress={() => {}} />
-          <SettingItem icon="mail-outline" title="Email Address" onPress={() => {}} />
-          <SettingItem icon="link-outline" title="Connected Accounts" onPress={() => {}} />
+          <SettingItem icon="person-outline" title="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
+          <SettingItem icon="lock-closed-outline" title="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
+          <SettingItem icon="mail-outline" title="Email Address" onPress={() => navigation.navigate('EmailAddress')} />
+          <SettingItem icon="link-outline" title="Connected Accounts" onPress={() => navigation.navigate('ConnectedAccounts')} />
         </View>
 
         <Text style={styles.sectionTitle}>Notifications</Text>
@@ -81,7 +88,7 @@ export default function SettingsScreen() {
               />
             }
           />
-          <SettingItem icon="options-outline" title="Manage Notification Types" onPress={() => {}} />
+          <SettingItem icon="options-outline" title="Manage Notification Types" onPress={() => navigation.navigate('NotificationSettings')} />
         </View>
 
         <Text style={styles.sectionTitle}>Privacy and Safety</Text>
@@ -176,9 +183,10 @@ const styles = StyleSheet.create({
     margin: 16,
     gap: 8,
   },
-  searchPlaceholder: {
+  searchInput: {
+    flex: 1,
     fontSize: 16,
-    color: Colors.textLight,
+    color: Colors.text,
   },
   sectionTitle: {
     fontSize: 14,
