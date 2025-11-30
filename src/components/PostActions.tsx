@@ -87,13 +87,44 @@ export default function PostActions({
 
   const handleRepost = (e?: any) => {
     e?.stopPropagation?.();
-    if (onRepost) {
-      onRepost();
-    } else {
-      setReposted(!reposted);
-      setRepostCount(reposted ? repostCount - 1 : repostCount + 1);
-      Alert.alert('Reposted', 'This post has been added to your feed');
+    if (reposted) {
+      // If already reposted, allow un-repost
+      setReposted(false);
+      setRepostCount(repostCount - 1);
+      Alert.alert('Unreposted', 'This post has been removed from your feed');
+      return;
     }
+    
+    // Show menu to choose between Repost and Quote
+    Alert.alert(
+      'Repost or Quote',
+      'Choose how you want to share this post',
+      [
+        {
+          text: 'Repost',
+          onPress: () => {
+            setReposted(true);
+            setRepostCount(repostCount + 1);
+            if (onRepost) {
+              onRepost();
+            } else {
+              Alert.alert('Reposted', 'This post has been added to your feed');
+            }
+          },
+        },
+        {
+          text: 'Quote',
+          onPress: () => {
+            if (onQuote) {
+              onQuote();
+            } else {
+              Alert.alert('Quote', 'Quote functionality will open the quote screen');
+            }
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
   };
 
   const handleQuote = (e?: any) => {
