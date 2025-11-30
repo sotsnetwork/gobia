@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -18,6 +18,24 @@ export default function AccessibilityScreen() {
   const [largerText, setLargerText] = useState(false);
   const [boldText, setBoldText] = useState(false);
   const [colorBlindMode, setColorBlindMode] = useState(false);
+
+  const handleAccessibilityChange = (
+    setter: (value: boolean) => void,
+    value: boolean,
+    settingName: string,
+    enabledMessage: string,
+    disabledMessage: string
+  ) => {
+    setter(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? `${settingName} Enabled` : `${settingName} Disabled`,
+        value ? enabledMessage : disabledMessage,
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
 
   const SettingItem = ({
     icon,
@@ -57,28 +75,60 @@ export default function AccessibilityScreen() {
             title="High Contrast"
             subtitle="Increase contrast for better visibility"
             value={highContrast}
-            onValueChange={setHighContrast}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setHighContrast,
+                value,
+                'High Contrast',
+                'High contrast mode is now enabled for better visibility.',
+                'High contrast mode is now disabled.'
+              )
+            }
           />
           <SettingItem
             icon="text-outline"
             title="Larger Text"
             subtitle="Increase text size throughout the app"
             value={largerText}
-            onValueChange={setLargerText}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setLargerText,
+                value,
+                'Larger Text',
+                'Text size has been increased throughout the app.',
+                'Text size has been reset to default.'
+              )
+            }
           />
           <SettingItem
             icon="text"
             title="Bold Text"
             subtitle="Make text bolder for better readability"
             value={boldText}
-            onValueChange={setBoldText}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setBoldText,
+                value,
+                'Bold Text',
+                'Text is now displayed in bold for better readability.',
+                'Text is now displayed in regular weight.'
+              )
+            }
           />
           <SettingItem
             icon="color-filter-outline"
             title="Color Blind Mode"
             subtitle="Adjust colors for color vision deficiencies"
             value={colorBlindMode}
-            onValueChange={setColorBlindMode}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setColorBlindMode,
+                value,
+                'Color Blind Mode',
+                'Color blind mode is now enabled. Colors have been adjusted.',
+                'Color blind mode is now disabled.'
+              )
+            }
           />
         </View>
 
@@ -89,7 +139,15 @@ export default function AccessibilityScreen() {
             title="Reduce Motion"
             subtitle="Minimize animations and transitions"
             value={reduceMotion}
-            onValueChange={setReduceMotion}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setReduceMotion,
+                value,
+                'Reduce Motion',
+                'Animations and transitions are now minimized.',
+                'Animations and transitions are now enabled.'
+              )
+            }
           />
         </View>
 
@@ -100,7 +158,15 @@ export default function AccessibilityScreen() {
             title="Screen Reader Support"
             subtitle="Enable support for screen readers"
             value={screenReader}
-            onValueChange={setScreenReader}
+            onValueChange={(value) =>
+              handleAccessibilityChange(
+                setScreenReader,
+                value,
+                'Screen Reader Support',
+                'Screen reader support is now enabled.',
+                'Screen reader support is now disabled.'
+              )
+            }
           />
         </View>
 
