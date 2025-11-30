@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import * as BookmarkService from '../services/bookmarkService';
 
 interface PostActionsProps {
   post: {
@@ -15,6 +16,8 @@ interface PostActionsProps {
     boosts?: number;
     views?: number;
     saved?: boolean;
+    timestamp?: string;
+    time?: string;
   };
   onLike?: () => void;
   onComment?: () => void;
@@ -26,6 +29,9 @@ interface PostActionsProps {
   showRepost?: boolean;
   showQuote?: boolean;
   compact?: boolean;
+  isComment?: boolean; // Indicates if this is a comment (not a post)
+  postId?: string; // Parent post ID if this is a comment
+  postTitle?: string; // Parent post title if this is a comment
 }
 
 export default function PostActions({
@@ -40,6 +46,9 @@ export default function PostActions({
   showRepost = true,
   showQuote = false,
   compact = false,
+  isComment = false,
+  postId,
+  postTitle,
 }: PostActionsProps) {
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
@@ -47,6 +56,20 @@ export default function PostActions({
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   const [repostCount, setRepostCount] = useState(post.reposts || post.boosts || 0);
   const views = post.views || 0;
+
+  // Check if already bookmarked on mount
+  useEffect(() => {
+    const checkBookmarkStatus = async () => {
+      if (isComment) {
+        const isBookmarked = await BookmarkService.isCommentBookmarked(post.id);
+        setBookmarked(isBookmarked);
+      } else {
+        const isBookmarked = await BookmarkService.isPostBookmarked(post.id);
+        setBookmarked(isBookmarked);
+      }
+    };
+    checkBookmarkStatus();
+  }, [post.id, isComment]);
 
   const formatCount = (count: number): string => {
     if (count >= 1000) {
@@ -82,10 +105,37 @@ export default function PostActions({
     }
   };
 
-  const handleBookmark = (e?: any) => {
+  const handleBookmark = async (e?: any) => {
     e?.stopPropagation?.();
-    setBookmarked(!bookmarked);
-    onBookmark?.();
+    const newBookmarkState = !bookmarked;
+    setBookmarked(newBookmarkState);
+
+    try {
+      if (isComment) {
+        // Save or remove comment bookmark
+        if (newBookmarkState) {
+          await BookmarkService.saveComment(post, postId, postTitle);
+          Alert.alert('Saved', 'Comment saved to bookmarks');
+        } else {
+          await BookmarkService.removeComment(post.id);
+          Alert.alert('Removed', 'Comment removed from bookmarks');
+        }
+      } else {
+        // Save or remove post bookmark
+        if (newBookmarkState) {
+          await BookmarkService.savePost(post);
+          Alert.alert('Saved', 'Post saved to bookmarks');
+        } else {
+          await BookmarkService.removePost(post.id);
+          Alert.alert('Removed', 'Post removed from bookmarks');
+        }
+      }
+      onBookmark?.();
+    } catch (error) {
+      // Revert state on error
+      setBookmarked(bookmarked);
+      Alert.alert('Error', 'Failed to update bookmark');
+    }
   };
 
   const handleComment = (e?: any) => {
