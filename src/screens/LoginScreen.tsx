@@ -63,7 +63,7 @@ export default function LoginScreen() {
 
           <Button
             title="Log In"
-            onPress={() => navigation.navigate('Feed')}
+            onPress={() => navigation.navigate('MainTabs')}
           />
 
           <TouchableOpacity
