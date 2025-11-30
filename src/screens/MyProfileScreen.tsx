@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -11,6 +11,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MyProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -19,7 +20,7 @@ export default function MyProfileScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowMenu(true)}>
           <Ionicons name="ellipsis-vertical" size={24} color={Colors.text} />
         </TouchableOpacity>
       </View>
@@ -27,7 +28,10 @@ export default function MyProfileScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.profileSection}>
           <View style={styles.avatar} />
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => navigation.navigate('EditProfile')}
+          >
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
           <Text style={styles.name}>Jane Doe</Text>
@@ -39,25 +43,6 @@ export default function MyProfileScreen() {
             <Text style={styles.statNumber}>342</Text>
             <Text style={styles.statLabel}>Followers</Text>
           </View>
-        </View>
-
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={styles.sectionItem}
-            onPress={() => navigation.navigate('ActivityLog')}
-          >
-            <Ionicons name="time-outline" size={24} color={Colors.text} />
-            <Text style={styles.sectionItemText}>Activity Log</Text>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.sectionItem}
-            onPress={() => navigation.navigate('ArchivedPosts')}
-          >
-            <Ionicons name="archive-outline" size={24} color={Colors.text} />
-            <Text style={styles.sectionItemText}>Archived Posts</Text>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textLight} />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.tabs}>
@@ -95,6 +80,99 @@ export default function MyProfileScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                navigation.navigate('Settings');
+              }}
+            >
+              <Ionicons name="settings-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Settings</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={async () => {
+                setShowMenu(false);
+                try {
+                  await Share.share({
+                    message: 'Check out my profile on Gobia! @CoolApp',
+                    title: 'Share Profile',
+                  });
+                } catch (error) {
+                  // Share cancelled or error
+                }
+              }}
+            >
+              <Ionicons name="share-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Share Profile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                navigation.navigate('ExportUserData');
+              }}
+            >
+              <Ionicons name="download-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Export Data</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                navigation.navigate('HelpSupport');
+              }}
+            >
+              <Ionicons name="help-circle-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Help & Support</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                Alert.alert(
+                  'Log Out',
+                  'Are you sure you want to log out?',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Log Out',
+                      style: 'destructive',
+                      onPress: () => {
+                        // In real app, would clear auth state and navigate to Welcome
+                        navigation.navigate('Welcome');
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Ionicons name="log-out-outline" size={24} color={Colors.error} />
+              <Text style={[styles.menuItemText, styles.logoutText]}>Log Out</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -176,25 +254,6 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     marginLeft: 4,
   },
-  section: {
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: Colors.borderLight,
-    marginVertical: 16,
-  },
-  sectionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderLight,
-  },
-  sectionItemText: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-    marginLeft: 12,
-  },
   tabs: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -269,6 +328,37 @@ const styles = StyleSheet.create({
   postActionText: {
     fontSize: 14,
     color: Colors.textLight,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 32,
+    paddingTop: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.borderLight,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: Colors.text,
+    marginLeft: 12,
+  },
+  logoutText: {
+    color: Colors.error,
+  },
+  menuDivider: {
+    height: 8,
+    backgroundColor: Colors.borderLight,
   },
 });
 
