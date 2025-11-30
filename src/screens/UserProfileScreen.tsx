@@ -5,6 +5,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 
@@ -65,17 +66,29 @@ export default function UserProfileScreen() {
   const posts = [
     {
       id: '1',
+      name: user.name,
+      handle: user.username,
       text: 'Just launched my new AI-powered design tool! Check it out and let me know what you think.',
+      timestamp: '2h',
       time: '2h',
       likes: 45,
       comments: 12,
+      reposts: 5,
+      views: 234,
+      saved: false,
     },
     {
       id: '2',
+      name: user.name,
+      handle: user.username,
       text: 'Looking for a co-founder with expertise in ML/AI. Building something big in the creator economy space.',
+      timestamp: '1d',
       time: '1d',
       likes: 89,
       comments: 23,
+      reposts: 12,
+      views: 567,
+      saved: false,
     },
   ];
 
@@ -172,24 +185,32 @@ export default function UserProfileScreen() {
 
         <View style={styles.posts}>
           {posts.map((post) => (
-            <TouchableOpacity
-              key={post.id}
-              style={styles.post}
-              onPress={() => navigation.navigate('PostDetail', { postId: post.id })}
-            >
-              <Text style={styles.postText}>{post.text}</Text>
-              <Text style={styles.postTime}>{post.time}</Text>
-              <View style={styles.postActions}>
-                <View style={styles.postAction}>
-                  <Ionicons name="heart-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.likes}</Text>
+            <View key={post.id} style={styles.post}>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => navigation.navigate('PostDetail', { post })}
+              >
+                <View style={styles.postHeader}>
+                  <View style={styles.postAvatar} />
+                  <View style={styles.postUserInfo}>
+                    <Text style={styles.postUsername}>{post.name}</Text>
+                    <Text style={styles.postHandle}>{post.handle} · {post.time}</Text>
+                  </View>
                 </View>
-                <View style={styles.postAction}>
-                  <Ionicons name="chatbubble-outline" size={18} color={Colors.textLight} />
-                  <Text style={styles.postActionText}>{post.comments}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+                <Text style={styles.postText}>{post.text}</Text>
+              </TouchableOpacity>
+              <PostActions
+                post={post}
+                onComment={() => navigation.navigate('PostDetail', { post })}
+                onRepost={() => {
+                  // Handle repost
+                }}
+                onQuote={() => navigation.navigate('QuotePost', { post })}
+                onBookmark={async () => {
+                  // Bookmark updated
+                }}
+              />
+            </View>
           ))}
         </View>
       </ScrollView>
@@ -330,29 +351,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.borderLight,
   },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  postAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    marginRight: 12,
+  },
+  postUserInfo: {
+    flex: 1,
+  },
+  postUsername: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  postHandle: {
+    fontSize: 14,
+    color: Colors.textLight,
+  },
   postText: {
     fontSize: 16,
     color: Colors.text,
     lineHeight: 24,
-    marginBottom: 8,
-  },
-  postTime: {
-    fontSize: 12,
-    color: Colors.textLight,
     marginBottom: 12,
-  },
-  postActions: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  postAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  postActionText: {
-    fontSize: 14,
-    color: Colors.textLight,
   },
   blockedContainer: {
     flex: 1,
