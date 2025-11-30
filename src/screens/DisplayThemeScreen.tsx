@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,6 +19,48 @@ export default function DisplayThemeScreen() {
   const [fontSize, setFontSize] = useState<FontSize>('medium');
   const [reduceMotion, setReduceMotion] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        'Theme Changed',
+        `Theme set to ${newTheme === 'auto' ? 'Auto (follows system)' : newTheme}. The app will update accordingly.`,
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
+  const handleFontSizeChange = (newSize: FontSize) => {
+    setFontSize(newSize);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        'Text Size Changed',
+        `Text size set to ${newSize}. The app will update accordingly.`,
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
+
+  const handleToggleChange = (
+    setter: (value: boolean) => void,
+    value: boolean,
+    settingName: string,
+    enabledMessage: string,
+    disabledMessage: string
+  ) => {
+    setter(value);
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert(
+        value ? `${settingName} Enabled` : `${settingName} Disabled`,
+        value ? enabledMessage : disabledMessage,
+        [{ text: 'OK' }]
+      );
+    }, 300);
+  };
 
   const themes: { value: Theme; label: string; description: string }[] = [
     { value: 'light', label: 'Light', description: 'Default light theme' },
@@ -42,7 +84,7 @@ export default function DisplayThemeScreen() {
             <TouchableOpacity
               key={t.value}
               style={[styles.option, theme === t.value && styles.optionActive]}
-              onPress={() => setTheme(t.value)}
+              onPress={() => handleThemeChange(t.value)}
             >
               <View style={styles.optionInfo}>
                 <Text style={styles.optionLabel}>{t.label}</Text>
@@ -61,7 +103,7 @@ export default function DisplayThemeScreen() {
             <TouchableOpacity
               key={fs.value}
               style={[styles.option, fontSize === fs.value && styles.optionActive]}
-              onPress={() => setFontSize(fs.value)}
+              onPress={() => handleFontSizeChange(fs.value)}
             >
               <View style={styles.optionInfo}>
                 <Text style={styles.optionLabel}>{fs.label}</Text>
@@ -83,7 +125,15 @@ export default function DisplayThemeScreen() {
             </View>
             <TouchableOpacity
               style={[styles.switch, reduceMotion && styles.switchActive]}
-              onPress={() => setReduceMotion(!reduceMotion)}
+              onPress={() =>
+                handleToggleChange(
+                  setReduceMotion,
+                  !reduceMotion,
+                  'Reduce Motion',
+                  'Animations and transitions are now minimized.',
+                  'Animations and transitions are now enabled.'
+                )
+              }
             >
               <View style={[styles.switchThumb, reduceMotion && styles.switchThumbActive]} />
             </TouchableOpacity>
@@ -95,7 +145,15 @@ export default function DisplayThemeScreen() {
             </View>
             <TouchableOpacity
               style={[styles.switch, highContrast && styles.switchActive]}
-              onPress={() => setHighContrast(!highContrast)}
+              onPress={() =>
+                handleToggleChange(
+                  setHighContrast,
+                  !highContrast,
+                  'High Contrast',
+                  'High contrast mode is now enabled for better visibility.',
+                  'High contrast mode is now disabled.'
+                )
+              }
             >
               <View style={[styles.switchThumb, highContrast && styles.switchThumbActive]} />
             </TouchableOpacity>
