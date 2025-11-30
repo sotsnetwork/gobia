@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -147,7 +147,11 @@ export default function App() {
             initialRouteName="MainTabs"
             screenOptions={{
               headerShown: false,
-              animation: 'slide_from_right',
+              animation: Platform.OS === 'ios' ? 'default' : 'slide_from_right',
+              animationDuration: 400,
+              gestureEnabled: true,
+              gestureDirection: 'horizontal',
+              fullScreenGestureEnabled: Platform.OS === 'ios',
             }}
           >
             {/* Auth */}
@@ -160,15 +164,51 @@ export default function App() {
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
 
             {/* Detail Screens */}
-            <Stack.Screen name="PostDetail" component={PostDetailScreen} />
-            <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-            <Stack.Screen name="QuotePost" component={QuotePostScreen} />
+            <Stack.Screen 
+              name="PostDetail" 
+              component={PostDetailScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                animationDuration: 400,
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
+                fullScreenGestureEnabled: Platform.OS === 'ios',
+              }}
+            />
+            <Stack.Screen 
+              name="CreatePost" 
+              component={CreatePostScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                animationDuration: 400,
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
+                fullScreenGestureEnabled: Platform.OS === 'ios',
+              }}
+            />
+            <Stack.Screen 
+              name="QuotePost" 
+              component={QuotePostScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                animationDuration: 400,
+                gestureEnabled: true,
+                gestureDirection: 'vertical',
+                fullScreenGestureEnabled: Platform.OS === 'ios',
+              }}
+            />
 
             {/* Profile */}
               <Stack.Screen
                 name="MyProfile"
                 component={MyProfileScreen}
-                options={{ animation: 'slide_from_left' }}
+                options={{ 
+                  animation: 'slide_from_left',
+                  animationDuration: 400,
+                  gestureEnabled: true,
+                  gestureDirection: 'horizontal',
+                  fullScreenGestureEnabled: Platform.OS === 'ios',
+                }}
               />
             <Stack.Screen name="UserProfile" component={UserProfileScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
