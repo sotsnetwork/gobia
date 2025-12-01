@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,12 +8,37 @@ import PostActions from '../components/PostActions';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 import * as AuthService from '../services/authService';
+import * as ProfileService from '../services/profileService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MyProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [showMenu, setShowMenu] = useState(false);
+  const [name, setName] = useState('Jane Doe');
+  const [bio, setBio] = useState('Building with React Native & Firebase | Founder');
+  const [username, setUsername] = useState('@CoolApp');
+  const [location, setLocation] = useState<string | undefined>('San Francisco, CA');
+  const [website, setWebsite] = useState<string | undefined>('https://coolapp.dev');
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await ProfileService.getProfile();
+        if (profile) {
+          setName(profile.name || 'Jane Doe');
+          setUsername(profile.username || '@CoolApp');
+          setBio(profile.bio || '');
+          setLocation(profile.location);
+          setWebsite(profile.website);
+        }
+      } catch (error) {
+        // Keep defaults on error
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -36,14 +61,45 @@ export default function MyProfileScreen() {
           >
             <Text style={styles.editButtonText}>Edit Profile</Text>
           </TouchableOpacity>
-          <Text style={styles.name}>Jane Doe</Text>
-          <Text style={styles.bio}>Building with React Native & Firebase | Founder</Text>
-          <Text style={styles.handle}>@CoolApp</Text>
+          <Text style={styles.name}>{name}</Text>
+          {!!bio && <Text style={styles.bio}>{bio}</Text>}
+          <Text style={styles.handle}>{username}</Text>
+          {location && (
+            <View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={16} color={Colors.textSecondary} />
+              <Text style={styles.infoText}>{location}</Text>
+            </View>
+          )}
+          {website && (
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={async () => {
+                try {
+                  await Linking.openURL(website);
+                } catch {
+                  Alert.alert('Error', 'Unable to open this link.');
+                }
+              }}
+            >
+              <Ionicons name="link-outline" size={16} color={Colors.textSecondary} />
+              <Text style={[styles.infoText, styles.linkText]} numberOfLines={1}>
+                {website.replace(/^https?:\/\//i, '')}
+              </Text>
+            </TouchableOpacity>
+          )}
           <View style={styles.stats}>
-            <Text style={styles.statNumber}>150</Text>
-            <Text style={styles.statLabel}>Following</Text>
-            <Text style={styles.statNumber}>342</Text>
-            <Text style={styles.statLabel}>Followers</Text>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>150</Text>
+              <Text style={styles.statLabel}>Posts</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>150</Text>
+              <Text style={styles.statLabel}>Following</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>342</Text>
+              <Text style={styles.statLabel}>Followers</Text>
+            </View>
           </View>
         </View>
 
@@ -285,7 +341,12 @@ const styles = StyleSheet.create({
   },
   stats: {
     flexDirection: 'row',
-    gap: 24,
+    justifyContent: 'center',
+    gap: 32,
+    marginTop: 16,
+  },
+  stat: {
+    alignItems: 'center',
   },
   statNumber: {
     fontSize: 18,
