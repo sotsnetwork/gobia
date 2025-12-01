@@ -17,8 +17,8 @@ export default function EditProfileScreen() {
   const [name, setName] = useState('Jane Doe');
   const [username, setUsername] = useState('@CoolApp');
   const [bio, setBio] = useState('Building with React Native & Firebase | Founder');
-  const [location, setLocation] = useState('San Francisco, CA');
-  const [website, setWebsite] = useState('coolapp.dev');
+  const [location, setLocation] = useState('');
+  const [website, setWebsite] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Load saved profile (if any) so edits persist
