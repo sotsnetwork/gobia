@@ -22,3 +22,7 @@ web-build/
 .env
 .env.local
 
+# Jupyter Notebooks (not used in this frontend project)
+*.ipynb
+.ipynb_checkpoints/
+
