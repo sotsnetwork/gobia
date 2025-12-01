@@ -18,8 +18,8 @@ export default function MyProfileScreen() {
   const [name, setName] = useState('Jane Doe');
   const [bio, setBio] = useState('Building with React Native & Firebase | Founder');
   const [username, setUsername] = useState('@CoolApp');
-  const [location, setLocation] = useState<string | undefined>('San Francisco, CA');
-  const [website, setWebsite] = useState<string | undefined>('https://coolapp.dev');
+  const [location, setLocation] = useState<string | undefined>(undefined);
+  const [website, setWebsite] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -93,12 +93,12 @@ export default function MyProfileScreen() {
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>150</Text>
-              <Text style={styles.statLabel}>Following</Text>
-            </View>
-            <View style={styles.stat}>
               <Text style={styles.statNumber}>342</Text>
               <Text style={styles.statLabel}>Followers</Text>
+            </View>
+            <View style={styles.stat}>
+              <Text style={styles.statNumber}>150</Text>
+              <Text style={styles.statLabel}>Following</Text>
             </View>
           </View>
         </View>
@@ -356,7 +356,6 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: Colors.textLight,
-    marginLeft: 4,
   },
   tabs: {
     flexDirection: 'row',
