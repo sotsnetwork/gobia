@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import { Colors } from '../constants/colors';
+import * as ProfileService from '../services/profileService';
 import { RootStackParamList } from '../types/navigation';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -20,15 +21,63 @@ export default function EditProfileScreen() {
   const [website, setWebsite] = useState('coolapp.dev');
   const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
+  // Load saved profile (if any) so edits persist
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await ProfileService.getProfile();
+        if (profile) {
+          setName(profile.name || 'Jane Doe');
+          setUsername(profile.username || '@CoolApp');
+          setBio(profile.bio || '');
+          setLocation(profile.location || '');
+          setWebsite(profile.website || '');
+        }
+      } catch (error) {
+        // Fallback to defaults on error
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      Alert.alert('Validation', 'Please enter your name.');
+      return;
+    }
+
+    if (!username.trim() || !username.startsWith('@')) {
+      Alert.alert('Validation', 'Please enter a valid username starting with "@".');
+      return;
+    }
+
+    let normalizedWebsite = website.trim();
+    if (normalizedWebsite.length > 0) {
+      // If the user entered a bare domain, prefix with https://
+      if (!/^https?:\/\//i.test(normalizedWebsite)) {
+        normalizedWebsite = `https://${normalizedWebsite}`;
+      }
+    }
+
     setSaving(true);
-    // Simulate API call
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      await ProfileService.saveProfile({
+        name: name.trim(),
+        username: username.trim(),
+        bio: bio.trim(),
+        location: location.trim() || undefined,
+        website: normalizedWebsite || undefined,
+      });
+
       Alert.alert('Success', 'Profile updated successfully!', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
-    }, 1000);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
