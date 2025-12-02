@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/logo.png",
     "splash": {
+      "image": "./assets/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -14,13 +16,19 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gobia.app"
+      "bundleIdentifier": "com.gobia.app",
+      "icon": "./assets/logo.png"
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.gobia.app"
+      "package": "com.gobia.app",
+      "icon": "./assets/logo.png"
+    },
+    "web": {
+      "favicon": "./assets/logo.png"
     }
   }
 }
