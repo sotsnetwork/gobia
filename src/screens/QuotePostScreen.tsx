@@ -70,10 +70,40 @@ export default function QuotePostScreen() {
 
           <View style={styles.quotedPost}>
             <View style={styles.quotedHeader}>
-              <View style={styles.quotedAvatar} />
+              <TouchableOpacity
+                onPress={() => {
+                  if (quotedContent?.handle) {
+                    const userId = quotedContent.userId || quotedContent.handle.replace('@', '');
+                    navigation.navigate('UserProfile', { userId, username: quotedContent.handle });
+                  }
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.quotedAvatar} />
+              </TouchableOpacity>
               <View style={styles.quotedUserInfo}>
-                <Text style={styles.quotedName}>{quotedContent?.name || 'User'}</Text>
-                <Text style={styles.quotedHandle}>{quotedContent?.handle || '@user'}</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (quotedContent?.handle) {
+                      const userId = quotedContent.userId || quotedContent.handle.replace('@', '');
+                      navigation.navigate('UserProfile', { userId, username: quotedContent.handle });
+                    }
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.quotedName}>{quotedContent?.name || 'User'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (quotedContent?.handle) {
+                      const userId = quotedContent.userId || quotedContent.handle.replace('@', '');
+                      navigation.navigate('UserProfile', { userId, username: quotedContent.handle });
+                    }
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.quotedHandle}>{quotedContent?.handle || '@user'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
             <Text style={styles.quotedText}>{quotedContent?.text || 'Original post content'}</Text>
