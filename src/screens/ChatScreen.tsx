@@ -27,12 +27,20 @@ import { RootStackParamList } from '../types/navigation';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'Chat'>;
 
+interface MediaFile {
+  uri: string;
+  type: 'image' | 'video';
+  name?: string;
+}
+
 interface Message {
   id: string;
   text: string;
   senderId: string;
   timestamp: string;
   isOwn: boolean;
+  read?: boolean; // Read/unread status
+  media?: MediaFile[]; // Media files attached to message
   reactions?: { emoji: string; userId: string }[];
   replyTo?: {
     id: string;
@@ -111,6 +119,7 @@ export default function ChatScreen() {
       senderId: 'other',
       timestamp: '10:30 AM',
       isOwn: false,
+      read: true,
       reactions: [],
     },
     {
@@ -119,6 +128,7 @@ export default function ChatScreen() {
       senderId: 'me',
       timestamp: '10:32 AM',
       isOwn: true,
+      read: true, // Own messages are always read
       reactions: [],
     },
     {
@@ -127,6 +137,7 @@ export default function ChatScreen() {
       senderId: 'other',
       timestamp: '10:35 AM',
       isOwn: false,
+      read: false, // Unread message
       reactions: [],
     },
   ]);
@@ -140,23 +151,91 @@ export default function ChatScreen() {
     });
   }, [messages]);
 
+  const [selectedMedia, setSelectedMedia] = useState<MediaFile[]>([]);
+  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
+  const handlePickMedia = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant media library permissions to share files.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsMultipleSelection: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets) {
+        const newMedia: MediaFile[] = result.assets
+          .filter((asset) => {
+            const size = asset.fileSize || 0;
+            if (size > MAX_FILE_SIZE) {
+              Alert.alert('File too large', `${asset.fileName || 'File'} is larger than 100MB. Please choose a smaller file.`);
+              return false;
+            }
+            return true;
+          })
+          .map((asset) => ({
+            uri: asset.uri,
+            type: asset.type === 'video' ? 'video' : 'image',
+            name: asset.fileName,
+          }));
+
+        if (newMedia.length > 0) {
+          setSelectedMedia([...selectedMedia, ...newMedia]);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick media. Please try again.');
+    }
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setSelectedMedia(selectedMedia.filter((_, i) => i !== index));
+  };
+
   const handleSend = () => {
-    if (message.trim()) {
+    if (message.trim() || selectedMedia.length > 0) {
       const newMessage: Message = {
         id: Date.now().toString(),
         text: message.trim(),
         senderId: 'me',
         timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
         isOwn: true,
+        read: false, // New message starts as unread until recipient reads it
+        media: selectedMedia.length > 0 ? [...selectedMedia] : undefined,
         reactions: [],
         replyTo: replyingTo || undefined,
       };
       setMessages([...messages, newMessage]);
       setMessage('');
+      setSelectedMedia([]);
       setReplyingTo(null);
       scrollViewRef.current?.scrollToEnd({ animated: true });
     }
   };
+
+  // Mark messages as read when they're viewed
+  useEffect(() => {
+    const unreadMessages = messages.filter(msg => !msg.isOwn && !msg.read);
+    if (unreadMessages.length > 0) {
+      // Simulate marking messages as read after a delay (in real app, this would be based on scroll position)
+      const timer = setTimeout(() => {
+        setMessages(prevMessages =>
+          prevMessages.map(msg => {
+            if (!msg.isOwn && !msg.read) {
+              return { ...msg, read: true };
+            }
+            return msg;
+          })
+        );
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages]);
 
   const handleEmojiSelect = (emoji: string) => {
     setMessage((prev) => prev + emoji);
@@ -169,14 +248,14 @@ export default function ChatScreen() {
       prevMessages.map((msg) => {
         if (msg.id === messageId) {
           const existingReactions = msg.reactions || [];
-          const userReactionIndex = existingReactions.findIndex((r) => r.userId === 'me');
+          const userReactionIndex = existingReactions.findIndex((r) => r.userId === 'me' && r.emoji === emoji);
           
           if (userReactionIndex >= 0) {
-            // Remove existing reaction
+            // Remove existing reaction if same emoji
             const updatedReactions = existingReactions.filter((_, i) => i !== userReactionIndex);
             return { ...msg, reactions: updatedReactions };
           } else {
-            // Add new reaction
+            // Add new reaction (can have multiple reactions from same user)
             return {
               ...msg,
               reactions: [...existingReactions, { emoji, userId: 'me' }],
