@@ -393,22 +393,59 @@ export default function ChatScreen() {
                       </View>
                     </View>
                   )}
-                  <Text style={[styles.messageText, msg.isOwn && styles.ownMessageText]}>
-                    {msg.text}
-                  </Text>
+                  {msg.media && msg.media.length > 0 && (
+                    <View style={styles.mediaContainer}>
+                      {msg.media.map((media, index) => (
+                        <View key={index} style={styles.mediaItem}>
+                          {media.type === 'image' ? (
+                            <Image source={{ uri: media.uri }} style={styles.mediaImage} />
+                          ) : (
+                            <View style={styles.mediaVideo}>
+                              <Ionicons name="play-circle" size={40} color={Colors.white} />
+                              <Text style={styles.mediaVideoText}>Video</Text>
+                            </View>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                  {msg.text ? (
+                    <Text style={[styles.messageText, msg.isOwn && styles.ownMessageText]}>
+                      {msg.text}
+                    </Text>
+                  ) : null}
                   <View style={styles.messageFooter}>
                     <Text style={[styles.timestamp, msg.isOwn && styles.ownTimestamp]}>
                       {msg.timestamp}
                     </Text>
+                    {msg.isOwn && (
+                      <Ionicons
+                        name={msg.read ? 'checkmark-done' : 'checkmark'}
+                        size={14}
+                        color={msg.read ? Colors.primary : Colors.textLight}
+                        style={styles.readIndicator}
+                      />
+                    )}
                     {msg.reactions && msg.reactions.length > 0 && (
                       <View style={styles.reactionsContainer}>
-                        {msg.reactions.map((reaction, index) => (
+                        {Object.entries(
+                          msg.reactions.reduce((acc, r) => {
+                            if (!acc[r.emoji]) {
+                              acc[r.emoji] = [];
+                            }
+                            acc[r.emoji].push(r.userId);
+                            return acc;
+                          }, {} as { [emoji: string]: string[] })
+                        ).map(([emoji, userIds], index) => (
                           <TouchableOpacity
-                            key={index}
+                            key={`${emoji}-${index}`}
                             style={styles.reactionBadge}
-                            onPress={() => handleMessageReaction(msg.id, reaction.emoji)}
+                            onPress={() => handleMessageReaction(msg.id, emoji)}
                           >
-                            <Text style={styles.reactionEmoji}>{reaction.emoji}</Text>
+                            <Text style={styles.reactionEmoji}>{emoji}</Text>
+                            {userIds.length > 1 && (
+                              <Text style={styles.reactionCount}>{userIds.length}</Text>
+                            )}
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -446,13 +483,7 @@ export default function ChatScreen() {
         <View style={styles.inputContainer}>
           <TouchableOpacity
             style={styles.attachButton}
-            onPress={() => {
-              Alert.alert('Attach File', 'Choose an option', [
-                { text: 'Photo', onPress: () => Alert.alert('Coming Soon', 'Photo attachment will be available soon') },
-                { text: 'Document', onPress: () => Alert.alert('Coming Soon', 'Document attachment will be available soon') },
-                { text: 'Cancel', style: 'cancel' },
-              ]);
-            }}
+            onPress={handlePickMedia}
           >
             <Ionicons name="attach-outline" size={24} color={Colors.textLight} />
           </TouchableOpacity>
@@ -480,17 +511,42 @@ export default function ChatScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]}
+            style={[styles.sendButton, !message.trim() && selectedMedia.length === 0 && styles.sendButtonDisabled]}
             onPress={handleSend}
-            disabled={!message.trim()}
+            disabled={!message.trim() && selectedMedia.length === 0}
           >
             <Ionicons
               name="send"
               size={20}
-              color={message.trim() ? Colors.white : Colors.textLight}
+              color={message.trim() || selectedMedia.length > 0 ? Colors.white : Colors.textLight}
             />
           </TouchableOpacity>
         </View>
+
+        {/* Selected Media Preview */}
+        {selectedMedia.length > 0 && (
+          <View style={styles.selectedMediaContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {selectedMedia.map((media, index) => (
+                <View key={index} style={styles.selectedMediaItem}>
+                  {media.type === 'image' ? (
+                    <Image source={{ uri: media.uri }} style={styles.selectedMediaImage} />
+                  ) : (
+                    <View style={styles.selectedMediaVideo}>
+                      <Ionicons name="videocam" size={24} color={Colors.white} />
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={styles.removeMediaButton}
+                    onPress={() => handleRemoveMedia(index)}
+                  >
+                    <Ionicons name="close-circle" size={20} color={Colors.error} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Quick Emojis */}
         {showQuickEmojis && (
@@ -857,5 +913,72 @@ const styles = StyleSheet.create({
   },
   reactionEmojiText: {
     fontSize: 28,
+  },
+  mediaContainer: {
+    marginBottom: 8,
+    gap: 8,
+  },
+  mediaItem: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  mediaImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 12,
+    resizeMode: 'cover',
+  },
+  mediaVideo: {
+    width: 200,
+    height: 200,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mediaVideoText: {
+    color: Colors.white,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  selectedMediaContainer: {
+    backgroundColor: Colors.backgroundLight,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+  },
+  selectedMediaItem: {
+    marginRight: 8,
+    position: 'relative',
+  },
+  selectedMediaImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
+  selectedMediaVideo: {
+    width: 80,
+    height: 80,
+    backgroundColor: Colors.borderLight,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  removeMediaButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: Colors.white,
+    borderRadius: 10,
+  },
+  readIndicator: {
+    marginLeft: 4,
+  },
+  reactionCount: {
+    fontSize: 10,
+    color: Colors.text,
+    marginLeft: 2,
   },
 });
