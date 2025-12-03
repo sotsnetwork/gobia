@@ -13,11 +13,13 @@ import {
   Animated,
   PanResponder,
   Dimensions,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import Header from '../components/Header';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
