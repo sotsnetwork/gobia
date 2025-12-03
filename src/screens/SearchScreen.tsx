@@ -145,10 +145,37 @@ export default function SearchScreen() {
                   onPress={() => navigation.navigate('PostDetail', { post })}
                 >
                   <View style={styles.postHeader}>
-                    <View style={styles.postAvatar} />
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        const userId = post.userId || post.handle.replace('@', '');
+                        navigation.navigate('UserProfile', { userId, username: post.handle });
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.postAvatar} />
+                    </TouchableOpacity>
                     <View style={styles.postUserInfo}>
-                      <Text style={styles.postUsername}>{post.name}</Text>
-                      <Text style={styles.postHandle}>{post.handle} · {post.timestamp}</Text>
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          const userId = post.userId || post.handle.replace('@', '');
+                          navigation.navigate('UserProfile', { userId, username: post.handle });
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.postUsername}>{post.name}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          const userId = post.userId || post.handle.replace('@', '');
+                          navigation.navigate('UserProfile', { userId, username: post.handle });
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.postHandle}>{post.handle} · {post.timestamp}</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                   <Text style={styles.postText}>{post.text}</Text>
