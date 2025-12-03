@@ -298,6 +298,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 24,
     marginBottom: 8,
+    marginLeft: 52, // Align with name/username (avatar width 40 + marginRight 12)
   },
   timestamp: {
     fontSize: 14,
