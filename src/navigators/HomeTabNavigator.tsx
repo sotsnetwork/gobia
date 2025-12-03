@@ -122,11 +122,38 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
       onPress={() => navigation.navigate('PostDetail', { post })}
     >
       <View style={styles.postHeader}>
-        <View style={styles.avatar} />
+        <TouchableOpacity
+          onPress={(e) => {
+            e.stopPropagation();
+            const userId = post.userId || post.handle.replace('@', '');
+            navigation.navigate('UserProfile', { userId, username: post.handle });
+          }}
+          activeOpacity={0.7}
+        >
+          <View style={styles.avatar} />
+        </TouchableOpacity>
         <View style={styles.postUserInfo}>
-          <Text style={styles.postUsername}>{post.name}</Text>
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              const userId = post.userId || post.handle.replace('@', '');
+              navigation.navigate('UserProfile', { userId, username: post.handle });
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.postUsername}>{post.name}</Text>
+          </TouchableOpacity>
           <View style={styles.handleRow}>
-            <Text style={styles.postHandle}>{post.handle}</Text>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                const userId = post.userId || post.handle.replace('@', '');
+                navigation.navigate('UserProfile', { userId, username: post.handle });
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.postHandle}>{post.handle}</Text>
+            </TouchableOpacity>
             {post.timestamp && (
               <>
                 <Text style={styles.handleSeparator}> · </Text>
