@@ -435,6 +435,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginBottom: 8,
+    marginLeft: 52, // Align with name/username (avatar width 40 + marginRight 12)
     paddingHorizontal: 8,
     paddingVertical: 4,
     backgroundColor: Colors.primaryLight + '30',
@@ -457,12 +458,14 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 24,
     marginBottom: 12,
+    marginLeft: 52, // Align with name/username (avatar width 40 + marginRight 12)
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     marginBottom: 12,
+    marginLeft: 52, // Align with name/username (avatar width 40 + marginRight 12)
   },
   locationText: {
     fontSize: 14,
