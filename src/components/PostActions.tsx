@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-na
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
 import * as BookmarkService from '../services/bookmarkService';
+import RepostQuoteModal from './RepostQuoteModal';
 
 interface PostActionsProps {
   post: {
@@ -55,6 +56,7 @@ export default function PostActions({
   const [bookmarked, setBookmarked] = useState(post.saved || false);
   const [likeCount, setLikeCount] = useState(post.likes || 0);
   const [repostCount, setRepostCount] = useState(post.reposts || post.boosts || 0);
+  const [showRepostModal, setShowRepostModal] = useState(false);
   const views = post.views || 0;
 
   // Check if already bookmarked on mount
@@ -95,36 +97,26 @@ export default function PostActions({
       return;
     }
     
-    // Show menu to choose between Repost and Quote
-    Alert.alert(
-      'Repost or Quote',
-      'Choose how you want to share this post',
-      [
-        {
-          text: 'Repost',
-          onPress: () => {
-            setReposted(true);
-            setRepostCount(repostCount + 1);
-            if (onRepost) {
-              onRepost();
-            } else {
-              Alert.alert('Reposted', 'This post has been added to your feed');
-            }
-          },
-        },
-        {
-          text: 'Quote',
-          onPress: () => {
-            if (onQuote) {
-              onQuote();
-            } else {
-              Alert.alert('Quote', 'Quote functionality will open the quote screen');
-            }
-          },
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    // Show modal to choose between Repost and Quote
+    setShowRepostModal(true);
+  };
+
+  const handleRepostConfirm = () => {
+    setReposted(true);
+    setRepostCount(repostCount + 1);
+    if (onRepost) {
+      onRepost();
+    } else {
+      Alert.alert('Reposted', 'This post has been added to your feed');
+    }
+  };
+
+  const handleQuoteConfirm = () => {
+    if (onQuote) {
+      onQuote();
+    } else {
+      Alert.alert('Quote', 'Quote functionality will open the quote screen');
+    }
   };
 
   const handleQuote = (e?: any) => {
@@ -310,6 +302,14 @@ export default function PostActions({
           <Ionicons name="chatbox-ellipses-outline" size={iconSize} color={Colors.textLight} />
         </TouchableOpacity>
       )}
+
+      {/* Repost/Quote Modal */}
+      <RepostQuoteModal
+        visible={showRepostModal}
+        onClose={() => setShowRepostModal(false)}
+        onRepost={handleRepostConfirm}
+        onQuote={handleQuoteConfirm}
+      />
     </View>
   );
 }
