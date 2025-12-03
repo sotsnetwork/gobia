@@ -39,22 +39,37 @@ interface ThreadPost {
   characterCount: number;
 }
 
+const SKILL_TAGS = [
+  'Frontend',
+  'Backend',
+  'Mobile',
+  'UI/UX Design',
+  'Product',
+  'Data / AI',
+  'DevOps',
+  'No‑code',
+  'Marketing / Growth',
+  'Community',
+  'Content',
+];
+
 export default function CreatePostScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [isThread, setIsThread] = useState(false);
   const [threadPosts, setThreadPosts] = useState<ThreadPost[]>([
     {
       id: '1',
-      text: 'I am building an AI app and I would love to connect with @',
+      text: '',
       media: [],
-      characterCount: 60,
+      characterCount: 280,
     },
   ]);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [showCommunityModal, setShowCommunityModal] = useState(false);
-  const [showMentions, setShowMentions] = useState(true);
+  const [showMentions, setShowMentions] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
 
   const currentPost = threadPosts[currentPostIndex];
   const text = currentPost.text;
@@ -282,6 +297,16 @@ export default function CreatePostScreen() {
     },
   ];
 
+  const hasAnyContent = threadPosts.some(
+    (post) => post.text.trim().length > 0 || post.media.length > 0
+  );
+
+  const toggleSkill = (skill: string) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <KeyboardAvoidingView
@@ -293,7 +318,17 @@ export default function CreatePostScreen() {
             <Ionicons name="close" size={24} color={Colors.text} />
           </TouchableOpacity>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.saveDraftButton}>
+            <TouchableOpacity
+              style={[
+                styles.saveDraftButton,
+                !hasAnyContent && styles.saveDraftButtonDisabled,
+              ]}
+              disabled={!hasAnyContent}
+              onPress={() => {
+                if (!hasAnyContent) return;
+                Alert.alert('Draft saved', 'Your post has been saved as a draft (mock).');
+              }}
+            >
               <Text style={styles.saveDraftText}>Save Draft</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -473,6 +508,39 @@ export default function CreatePostScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Skills Needed */}
+          <View style={styles.skillsSection}>
+            <Text style={styles.skillsLabel}>Skills needed (optional)</Text>
+            <Text style={styles.skillsSubtext}>
+              Highlight the skills you’re looking for so the right collaborators can find your project.
+            </Text>
+            <View style={styles.skillsChipsContainer}>
+              {SKILL_TAGS.map((skill) => {
+                const isSelected = selectedSkills.includes(skill);
+                return (
+                  <TouchableOpacity
+                    key={skill}
+                    style={[
+                      styles.skillChip,
+                      isSelected && styles.skillChipSelected,
+                    ]}
+                    onPress={() => toggleSkill(skill)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      style={[
+                        styles.skillChipText,
+                        isSelected && styles.skillChipTextSelected,
+                      ]}
+                    >
+                      {skill}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
           {/* Thread Toggle */}
           <View style={styles.threadToggle}>
             <TouchableOpacity
@@ -644,6 +712,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: Colors.primary,
+  },
+  saveDraftButtonDisabled: {
+    opacity: 0.4,
   },
   saveDraftText: {
     color: Colors.primary,
@@ -970,6 +1041,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '500',
+  },
+  skillsSection: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+  },
+  skillsLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  skillsSubtext: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 12,
+  },
+  skillsChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.white,
+  },
+  skillChipSelected: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primary,
+  },
+  skillChipText: {
+    fontSize: 13,
+    color: Colors.text,
+  },
+  skillChipTextSelected: {
+    color: Colors.primary,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,
