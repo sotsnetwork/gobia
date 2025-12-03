@@ -132,10 +132,37 @@ export default function MyProfileScreen() {
               })}
             >
               <View style={styles.postHeader}>
-                <View style={styles.postAvatar} />
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    // Already on MyProfile, but keep consistent behavior
+                    navigation.navigate('MyProfile');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.postAvatar} />
+                </TouchableOpacity>
                 <View style={styles.postUserInfo}>
-                  <Text style={styles.postUsername}>Jane Doe</Text>
-                  <Text style={styles.postHandle}>@jane_doe · 2h</Text>
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      // Already on MyProfile, but keep consistent behavior
+                      navigation.navigate('MyProfile');
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.postUsername}>Jane Doe</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      // Already on MyProfile, but keep consistent behavior
+                      navigation.navigate('MyProfile');
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.postHandle}>@jane_doe · 2h</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
               <Text style={styles.postText}>
