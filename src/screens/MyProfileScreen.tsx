@@ -55,12 +55,6 @@ export default function MyProfileScreen() {
       <ScrollView style={styles.scrollView}>
         <View style={styles.profileSection}>
           <View style={styles.avatar} />
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate('EditProfile')}
-          >
-            <Text style={styles.editButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
           <Text style={styles.name}>{name}</Text>
           {!!bio && <Text style={styles.bio}>{bio}</Text>}
           <Text style={styles.handle}>{username}</Text>
@@ -212,6 +206,17 @@ export default function MyProfileScreen() {
           onPress={() => setShowMenu(false)}
         >
           <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                navigation.navigate('EditProfile');
+              }}
+            >
+              <Ionicons name="create-outline" size={24} color={Colors.text} />
+              <Text style={styles.menuItemText}>Edit Profile</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
