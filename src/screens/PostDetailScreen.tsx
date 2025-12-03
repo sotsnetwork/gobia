@@ -84,10 +84,34 @@ export default function PostDetailScreen() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.post}>
           <View style={styles.postHeader}>
-            <View style={styles.avatar} />
+            <TouchableOpacity
+              onPress={() => {
+                const userId = post.userId || post.handle.replace('@', '');
+                navigation.navigate('UserProfile', { userId, username: post.handle });
+              }}
+              activeOpacity={0.7}
+            >
+              <View style={styles.avatar} />
+            </TouchableOpacity>
             <View style={styles.postUserInfo}>
-              <Text style={styles.postUsername}>{post.name}</Text>
-              <Text style={styles.postHandle}>{post.handle}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const userId = post.userId || post.handle.replace('@', '');
+                  navigation.navigate('UserProfile', { userId, username: post.handle });
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.postUsername}>{post.name}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const userId = post.userId || post.handle.replace('@', '');
+                  navigation.navigate('UserProfile', { userId, username: post.handle });
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.postHandle}>{post.handle}</Text>
+              </TouchableOpacity>
             </View>
           </View>
           <Text style={styles.postText}>{post.text}</Text>
@@ -113,13 +137,37 @@ export default function PostDetailScreen() {
           <Text style={styles.commentsTitle}>Replies ({comments.length})</Text>
           {comments.map((comment) => (
             <View key={comment.id} style={styles.comment}>
-              <View style={styles.commentAvatar} />
+              <TouchableOpacity
+                onPress={() => {
+                  const userId = comment.userId || comment.handle.replace('@', '');
+                  navigation.navigate('UserProfile', { userId, username: comment.handle });
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.commentAvatar} />
+              </TouchableOpacity>
               <View style={styles.commentContent}>
                 <View style={styles.commentHeader}>
-                  <Text style={styles.commentName}>{comment.name}</Text>
-                  <Text style={styles.commentHandle}>
-                    {comment.handle} · {comment.time}
-                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const userId = comment.userId || comment.handle.replace('@', '');
+                      navigation.navigate('UserProfile', { userId, username: comment.handle });
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.commentName}>{comment.name}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const userId = comment.userId || comment.handle.replace('@', '');
+                      navigation.navigate('UserProfile', { userId, username: comment.handle });
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.commentHandle}>
+                      {comment.handle} · {comment.time}
+                    </Text>
+                  </TouchableOpacity>
                   <TouchableOpacity>
                     <Ionicons name="ellipsis-horizontal" size={16} color={Colors.textLight} />
                   </TouchableOpacity>
