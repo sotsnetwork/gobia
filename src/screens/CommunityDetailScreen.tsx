@@ -307,6 +307,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 24,
     marginBottom: 12,
+    marginLeft: 52, // Align with name/username (avatar width 40 + marginRight 12)
   },
   postActions: {
     flexDirection: 'row',
