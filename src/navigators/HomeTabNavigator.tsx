@@ -194,7 +194,7 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
       }}
       onComment={() => navigation.navigate('PostDetail', { post })}
       onRepost={() => {
-        // Handle repost
+        // Repost handled by PostActions component
       }}
       onQuote={() => {
         navigation.navigate('QuotePost', { post });
