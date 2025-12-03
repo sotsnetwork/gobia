@@ -74,12 +74,39 @@ export default function SavedPostsScreen() {
                 onPress={() => navigation.navigate('PostDetail', { postId: post.id, post })}
               >
                 <View style={styles.postHeader}>
-                  <View style={styles.avatar} />
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      const userId = post.userId || post.handle.replace('@', '');
+                      navigation.navigate('UserProfile', { userId, username: post.handle });
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.avatar} />
+                  </TouchableOpacity>
                   <View style={styles.postUserInfo}>
-                    <Text style={styles.postAuthor}>{post.name}</Text>
-                    <Text style={styles.postHandle}>
-                      {post.handle} · {post.time || post.timestamp || 'Recently'}
-                    </Text>
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        const userId = post.userId || post.handle.replace('@', '');
+                        navigation.navigate('UserProfile', { userId, username: post.handle });
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.postAuthor}>{post.name}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        const userId = post.userId || post.handle.replace('@', '');
+                        navigation.navigate('UserProfile', { userId, username: post.handle });
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.postHandle}>
+                        {post.handle} · {post.time || post.timestamp || 'Recently'}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                   <TouchableOpacity
                     onPress={() => handleRemoveBookmark(post.id)}
