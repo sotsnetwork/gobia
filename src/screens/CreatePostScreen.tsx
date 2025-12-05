@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Modal, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as DraftService from '../services/draftService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type RoutePropType = RouteProp<RootStackParamList, 'CreatePost'>;
 
 interface Community {
   id: string;
@@ -55,21 +57,51 @@ const SKILL_TAGS = [
 
 export default function CreatePostScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [isThread, setIsThread] = useState(false);
-  const [threadPosts, setThreadPosts] = useState<ThreadPost[]>([
-    {
+  const route = useRoute<RoutePropType>();
+  const draftParam = route.params?.draft;
+  
+  const [isThread, setIsThread] = useState(() => {
+    return draftParam?.threadPosts && draftParam.threadPosts.length > 1;
+  });
+  const [draftId] = useState(() => draftParam?.id || `draft_${Date.now()}`);
+  const [threadPosts, setThreadPosts] = useState<ThreadPost[]>(() => {
+    if (draftParam) {
+      if (draftParam.threadPosts && draftParam.threadPosts.length > 1) {
+        return draftParam.threadPosts.map((tp: any) => ({
+          id: tp.id || Date.now().toString(),
+          text: tp.text || '',
+          media: tp.media || [],
+          characterCount: tp.characterCount || 280 - (tp.text?.length || 0),
+        }));
+      }
+      return [{
+        id: '1',
+        text: draftParam.text || '',
+        media: draftParam.media || [],
+        characterCount: draftParam.characterCount || 280 - (draftParam.text?.length || 0),
+      }];
+    }
+    return [{
       id: '1',
       text: '',
       media: [],
       characterCount: 280,
-    },
-  ]);
+    }];
+  });
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(() => {
+    if (draftParam?.communityId && draftParam?.communityName) {
+      return {
+        id: draftParam.communityId,
+        name: draftParam.communityName,
+      };
+    }
+    return null;
+  });
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(() => draftParam?.selectedSkills || []);
 
   const currentPost = threadPosts[currentPostIndex];
   const text = currentPost.text;
@@ -324,9 +356,25 @@ export default function CreatePostScreen() {
                 !hasAnyContent && styles.saveDraftButtonDisabled,
               ]}
               disabled={!hasAnyContent}
-              onPress={() => {
+              onPress={async () => {
                 if (!hasAnyContent) return;
-                Alert.alert('Draft saved', 'Your post has been saved as a draft (mock).');
+                try {
+                  const draft: DraftService.Draft = {
+                    id: draftId,
+                    text: threadPosts[0].text,
+                    media: threadPosts[0].media,
+                    timestamp: new Date().toISOString(),
+                    characterCount: threadPosts[0].characterCount,
+                    threadPosts: isThread && threadPosts.length > 1 ? threadPosts : undefined,
+                    selectedSkills: selectedSkills.length > 0 ? selectedSkills : undefined,
+                    communityId: selectedCommunity?.id,
+                    communityName: selectedCommunity?.name,
+                  };
+                  await DraftService.saveDraft(draft);
+                  Alert.alert('Draft saved', 'Your post has been saved as a draft.');
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to save draft. Please try again.');
+                }
               }}
             >
               <Text style={styles.saveDraftText}>Save Draft</Text>
