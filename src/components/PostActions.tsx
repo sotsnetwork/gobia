@@ -51,6 +51,7 @@ export default function PostActions({
   postId,
   postTitle,
 }: PostActionsProps) {
+  const navigation = useNavigation<NavigationProp>();
   const [liked, setLiked] = useState(false);
   const [reposted, setReposted] = useState(false);
   const [bookmarked, setBookmarked] = useState(post.saved || false);
@@ -197,8 +198,7 @@ export default function PostActions({
 
   const handleViews = (e?: any) => {
     e?.stopPropagation?.();
-    // In real app, would navigate to analytics/view details
-    Alert.alert('Post Analytics', `This post has ${formatCount(views)} views.`);
+    navigation.navigate('PostAnalytics', { post });
   };
 
   const iconSize = compact ? 16 : 20;
