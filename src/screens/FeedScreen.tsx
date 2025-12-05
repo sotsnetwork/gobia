@@ -6,13 +6,16 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
 import PostActions from '../components/PostActions';
+import Avatar from '../components/Avatar';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import { useUserAvatar } from '../hooks/useUserAvatar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function FeedScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const userAvatar = useUserAvatar();
 
   const posts = [
     {
@@ -71,7 +74,7 @@ export default function FeedScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('MyProfile')}>
-          <View style={styles.avatarLarge} />
+          <Avatar uri={userAvatar} size={36} />
         </TouchableOpacity>
         <View style={styles.headerLogo}>
           <Logo size={32} />
@@ -97,7 +100,10 @@ export default function FeedScreen() {
                   }}
                   activeOpacity={0.7}
                 >
-                  <View style={styles.avatar} />
+                  <Avatar 
+                    uri={(post.handle === '@you' || post.name === 'You') ? userAvatar : undefined} 
+                    size={40} 
+                  />
                 </TouchableOpacity>
                 <View style={styles.postUserInfo}>
                   <TouchableOpacity
