@@ -6,8 +6,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '../components/Logo';
 import PostActions from '../components/PostActions';
+import Avatar from '../components/Avatar';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import { useUserAvatar } from '../hooks/useUserAvatar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -115,23 +117,27 @@ const communityPosts = [
   },
 ];
 
-const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp }) => (
-  <View style={styles.post}>
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() => navigation.navigate('PostDetail', { post })}
-    >
-      <View style={styles.postHeader}>
-        <TouchableOpacity
-          onPress={(e) => {
-            e.stopPropagation();
-            const userId = post.userId || post.handle.replace('@', '');
-            navigation.navigate('UserProfile', { userId, username: post.handle });
-          }}
-          activeOpacity={0.7}
-        >
-          <View style={styles.avatar} />
-        </TouchableOpacity>
+const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp }) => {
+  const userAvatar = useUserAvatar();
+  const isCurrentUser = post.handle === '@you' || post.name === 'You';
+  
+  return (
+    <View style={styles.post}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate('PostDetail', { post })}
+      >
+        <View style={styles.postHeader}>
+          <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              const userId = post.userId || post.handle.replace('@', '');
+              navigation.navigate('UserProfile', { userId, username: post.handle });
+            }}
+            activeOpacity={0.7}
+          >
+            <Avatar uri={isCurrentUser ? userAvatar : undefined} size={40} />
+          </TouchableOpacity>
         <View style={styles.postUserInfo}>
           <TouchableOpacity
             onPress={(e) => {
@@ -201,7 +207,8 @@ const PostItem = ({ post, navigation }: { post: any; navigation: NavigationProp 
       }}
     />
   </View>
-);
+  );
+};
 
 const ForYouScreen = () => {
   const navigation = useNavigation<NavigationProp>();
