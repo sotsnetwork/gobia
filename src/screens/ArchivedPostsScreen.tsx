@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as PostService from '../services/postService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const archivedPosts = [
+interface ArchivedPost {
+  id: string;
+  text: string;
+  time: string;
+  likes: number;
+  comments: number;
+}
+
+const sampleArchivedPosts: ArchivedPost[] = [
   {
     id: '1',
     text: 'Just shipped a new feature for @CoolApp! It\'s a real-time collaboration tool built with Firebase.',
@@ -29,29 +38,59 @@ const archivedPosts = [
 
 export default function ArchivedPostsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [posts, setPosts] = useState(archivedPosts);
+  const [posts, setPosts] = useState<ArchivedPost[]>(sampleArchivedPosts);
 
-  const handleUnarchive = (postId: string) => {
+  const loadArchivedPosts = async () => {
+    try {
+      const archivedIds = await PostService.getArchivedPosts();
+      // In a real app, you'd fetch posts by IDs from backend
+      // For now, filter sample posts by archived IDs
+      const filtered = sampleArchivedPosts.filter((p) => archivedIds.includes(p.id));
+      setPosts(filtered.length > 0 ? filtered : sampleArchivedPosts);
+    } catch (error) {
+      console.error('Error loading archived posts:', error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadArchivedPosts();
+    }, [])
+  );
+
+  const handleUnarchive = async (postId: string) => {
     Alert.alert('Unarchive Post', 'Move this post back to your profile?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Unarchive',
-        onPress: () => {
-          setPosts(posts.filter((p) => p.id !== postId));
-          Alert.alert('Success', 'Post has been unarchived');
+        onPress: async () => {
+          try {
+            await PostService.unarchivePost(postId);
+            await loadArchivedPosts();
+            Alert.alert('Success', 'Post has been unarchived');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to unarchive post. Please try again.');
+          }
         },
       },
     ]);
   };
 
-  const handleDelete = (postId: string) => {
+  const handleDelete = async (postId: string) => {
     Alert.alert('Delete Post', 'Are you sure you want to permanently delete this post?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => {
-          setPosts(posts.filter((p) => p.id !== postId));
+        onPress: async () => {
+          try {
+            await PostService.deletePost(postId);
+            await PostService.unarchivePost(postId); // Remove from archived as well
+            await loadArchivedPosts();
+            Alert.alert('Success', 'Post has been deleted');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete post. Please try again.');
+          }
         },
       },
     ]);
