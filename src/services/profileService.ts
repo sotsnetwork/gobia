@@ -8,6 +8,7 @@ export interface ProfileData {
   bio: string;
   location?: string;
   website?: string;
+  avatarUri?: string; // URI of the profile picture
 }
 
 export async function saveProfile(profile: ProfileData): Promise<void> {
