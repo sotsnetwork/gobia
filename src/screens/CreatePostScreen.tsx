@@ -5,9 +5,11 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import Avatar from '../components/Avatar';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 import * as DraftService from '../services/draftService';
+import { useUserAvatar } from '../hooks/useUserAvatar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'CreatePost'>;
@@ -58,6 +60,7 @@ const SKILL_TAGS = [
 export default function CreatePostScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RoutePropType>();
+  const userAvatar = useUserAvatar();
   const draftParam = route.params?.draft;
   
   const [isThread, setIsThread] = useState(() => {
@@ -432,7 +435,7 @@ export default function CreatePostScreen() {
           )}
 
           <View style={styles.postContent}>
-            <View style={styles.avatar} />
+            <Avatar uri={userAvatar} size={40} />
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.textInput}
