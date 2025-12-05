@@ -1,25 +1,29 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert, Linking, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import PostActions from '../components/PostActions';
+import Avatar from '../components/Avatar';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
 import * as AuthService from '../services/authService';
 import * as ProfileService from '../services/profileService';
+import { useUserAvatar } from '../hooks/useUserAvatar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function MyProfileScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const userAvatar = useUserAvatar();
   const [showMenu, setShowMenu] = useState(false);
   const [name, setName] = useState('Jane Doe');
   const [bio, setBio] = useState('Building with React Native & Firebase | Founder');
   const [username, setUsername] = useState('@CoolApp');
   const [location, setLocation] = useState<string | undefined>(undefined);
   const [website, setWebsite] = useState<string | undefined>(undefined);
+  const [avatarUri, setAvatarUri] = useState<string | undefined>(undefined);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -30,6 +34,7 @@ export default function MyProfileScreen() {
         setBio(profile.bio || '');
         setLocation(profile.location);
         setWebsite(profile.website);
+        setAvatarUri(profile.avatarUri);
       } else {
         // Reset to defaults if no profile found
         setName('Jane Doe');
@@ -37,6 +42,7 @@ export default function MyProfileScreen() {
         setBio('Building with React Native & Firebase | Founder');
         setLocation(undefined);
         setWebsite(undefined);
+        setAvatarUri(undefined);
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -64,7 +70,11 @@ export default function MyProfileScreen() {
 
       <ScrollView style={styles.scrollView}>
         <View style={styles.profileSection}>
-          <View style={styles.avatar} />
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatar} />
+          )}
           <Text style={styles.name}>{name}</Text>
           {!!bio && <Text style={styles.bio}>{bio}</Text>}
           <Text style={styles.handle}>{username}</Text>
@@ -144,7 +154,7 @@ export default function MyProfileScreen() {
                   }}
                   activeOpacity={0.7}
                 >
-                  <View style={styles.postAvatar} />
+                  <Avatar uri={userAvatar} size={32} style={styles.postAvatar} />
                 </TouchableOpacity>
                 <View style={styles.postUserInfo}>
                   <TouchableOpacity
