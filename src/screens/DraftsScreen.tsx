@@ -1,67 +1,86 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as DraftService from '../services/draftService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-interface Draft {
-  id: string;
-  text: string;
-  timestamp: string;
-  characterCount: number;
-}
-
-const sampleDrafts: Draft[] = [
-  {
-    id: '1',
-    text: 'I am building an AI app and I would love to connect with @',
-    timestamp: '2 hours ago',
-    characterCount: 60,
-  },
-  {
-    id: '2',
-    text: 'Just finished a major update to my project. Here are the key features:\n\n1. Real-time collaboration\n2. Advanced analytics\n3. Custom integrations',
-    timestamp: '1 day ago',
-    characterCount: 145,
-  },
-  {
-    id: '3',
-    text: 'Looking for feedback on my new SaaS product. Would appreciate any thoughts!',
-    timestamp: '3 days ago',
-    characterCount: 78,
-  },
-];
-
 export default function DraftsScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [drafts, setDrafts] = useState<Draft[]>(sampleDrafts);
+  const [drafts, setDrafts] = useState<DraftService.Draft[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleDelete = (draftId: string) => {
+  const loadDrafts = async () => {
+    try {
+      const loadedDrafts = await DraftService.getDrafts();
+      setDrafts(loadedDrafts);
+    } catch (error) {
+      console.error('Error loading drafts:', error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDrafts();
+    }, [])
+  );
+
+  const handleDelete = async (draftId: string) => {
     Alert.alert('Delete Draft', 'Are you sure you want to delete this draft?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => setDrafts(drafts.filter((d) => d.id !== draftId)),
+        onPress: async () => {
+          try {
+            await DraftService.deleteDraft(draftId);
+            await loadDrafts();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to delete draft. Please try again.');
+          }
+        },
       },
     ]);
   };
 
-  const handleEdit = (draft: Draft) => {
-    navigation.navigate('CreatePost');
-    // In real app, would pass draft data to CreatePost screen
+  const handleEdit = (draft: DraftService.Draft) => {
+    navigation.navigate('CreatePost', { draft });
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
+    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+    if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+    return date.toLocaleDateString();
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDrafts();
+    setRefreshing(false);
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header title="Drafts" />
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {drafts.length > 0 ? (
           drafts.map((draft) => (
             <View key={draft.id} style={styles.draft}>
@@ -71,11 +90,35 @@ export default function DraftsScreen() {
                 activeOpacity={0.7}
               >
                 <Text style={styles.draftText} numberOfLines={3}>
-                  {draft.text}
+                  {draft.text || '(No text)'}
                 </Text>
+                {draft.media && draft.media.length > 0 && (
+                  <View style={styles.mediaIndicator}>
+                    <Ionicons name="image-outline" size={14} color={Colors.textLight} />
+                    <Text style={styles.mediaText}>{draft.media.length} {draft.media.length === 1 ? 'media' : 'media'}</Text>
+                  </View>
+                )}
+                {draft.selectedSkills && draft.selectedSkills.length > 0 && (
+                  <View style={styles.skillsIndicator}>
+                    <Ionicons name="pricetag-outline" size={14} color={Colors.textLight} />
+                    <Text style={styles.skillsText}>{draft.selectedSkills.length} {draft.selectedSkills.length === 1 ? 'skill' : 'skills'}</Text>
+                  </View>
+                )}
+                {draft.communityName && (
+                  <View style={styles.communityIndicator}>
+                    <Ionicons name="people-outline" size={14} color={Colors.textLight} />
+                    <Text style={styles.communityText}>{draft.communityName}</Text>
+                  </View>
+                )}
+                {draft.threadPosts && draft.threadPosts.length > 1 && (
+                  <View style={styles.threadIndicator}>
+                    <Ionicons name="layers-outline" size={14} color={Colors.textLight} />
+                    <Text style={styles.threadText}>Thread ({draft.threadPosts.length} posts)</Text>
+                  </View>
+                )}
                 <View style={styles.draftFooter}>
-                  <Text style={styles.draftTimestamp}>{draft.timestamp}</Text>
-                  <Text style={styles.draftCount}>{draft.characterCount} characters</Text>
+                  <Text style={styles.draftTimestamp}>{formatTimestamp(draft.timestamp)}</Text>
+                  <Text style={styles.draftCount}>{280 - draft.characterCount} characters</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -166,6 +209,50 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  mediaIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  mediaText: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  skillsIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  skillsText: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  communityIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  communityText: {
+    fontSize: 12,
+    color: Colors.textLight,
+  },
+  threadIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  threadText: {
+    fontSize: 12,
+    color: Colors.textLight,
   },
 });
 
