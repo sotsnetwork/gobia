@@ -110,7 +110,7 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {shouldShowSection(['Edit Profile', 'Change Password', 'Email Address', 'Connected Accounts', 'Activity Log', 'Archived Posts']) && (
+        {shouldShowSection(['Edit Profile', 'Change Password', 'Email Address', 'Connected Accounts', 'Activity Log', 'Archived Posts', 'Saved Posts', 'Saved Comments']) && (
           <>
             <Text style={styles.sectionTitle}>Account Settings</Text>
             <View style={styles.section}>
@@ -120,6 +120,18 @@ export default function SettingsScreen() {
           <SettingItem icon="link-outline" title="Connected Accounts" onPress={() => navigation.navigate('ConnectedAccounts')} />
           <SettingItem icon="time-outline" title="Activity Log" onPress={() => navigation.navigate('ActivityLog')} />
           <SettingItem icon="archive-outline" title="Archived Posts" onPress={() => navigation.navigate('ArchivedPosts')} />
+        </View>
+          </>
+        )}
+
+        {shouldShowSection(['Saved Posts', 'Saved Comments', 'Saved Searches', 'Drafts']) && (
+          <>
+            <Text style={styles.sectionTitle}>Saved Content</Text>
+            <View style={styles.section}>
+          <SettingItem icon="bookmark-outline" title="Saved Posts" onPress={() => navigation.navigate('SavedPosts')} />
+          <SettingItem icon="chatbubble-ellipses-outline" title="Saved Comments" onPress={() => navigation.navigate('SavedComments')} />
+          <SettingItem icon="search-outline" title="Saved Searches" onPress={() => navigation.navigate('SavedSearches')} />
+          <SettingItem icon="document-text-outline" title="Drafts" onPress={() => navigation.navigate('Drafts')} />
         </View>
           </>
         )}
