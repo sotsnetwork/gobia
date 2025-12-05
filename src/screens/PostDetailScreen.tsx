@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,9 +12,26 @@ import { RootStackParamList } from '../types/navigation';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'PostDetail'>;
 
+interface Comment {
+  id: string;
+  name: string;
+  handle: string;
+  time: string;
+  text: string;
+  likes: number;
+  reposts: number;
+  saved: boolean;
+  userId?: string;
+  replyToId?: string; // ID of the comment/post this is replying to
+  replyToName?: string; // Name of the user being replied to
+  replyToHandle?: string; // Handle of the user being replied to
+}
+
 export default function PostDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RoutePropType>();
+  const replyInputRef = useRef<TextInput>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const post = route.params?.post ?? {
     id: 'default',
@@ -30,7 +47,8 @@ export default function PostDetailScreen() {
   };
 
   const [replyText, setReplyText] = useState('');
-  const [comments, setComments] = useState([
+  const [replyingTo, setReplyingTo] = useState<{ id: string; name: string; handle: string; isPost: boolean } | null>(null);
+  const [comments, setComments] = useState<Comment[]>([
     {
       id: 'c1',
       name: 'Alex Dev',
@@ -63,11 +81,59 @@ export default function PostDetailScreen() {
     },
   ]);
 
+  const handleCommentOnPost = () => {
+    setReplyingTo({ id: post.id, name: post.name, handle: post.handle, isPost: true });
+    setTimeout(() => {
+      replyInputRef.current?.focus();
+    }, 100);
+  };
+
+  const handleCommentOnComment = (comment: Comment) => {
+    setReplyingTo({ id: comment.id, name: comment.name, handle: comment.handle, isPost: false });
+    setTimeout(() => {
+      replyInputRef.current?.focus();
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
+
   const handleReplySubmit = () => {
     if (replyText.trim()) {
-      // In real app, submit reply to backend
+      const newComment: Comment = {
+        id: `c${Date.now()}`,
+        name: 'You', // In real app, get from auth context
+        handle: '@you', // In real app, get from auth context
+        time: 'now',
+        text: replyText.trim(),
+        likes: 0,
+        reposts: 0,
+        saved: false,
+        replyToId: replyingTo?.id,
+        replyToName: replyingTo?.name,
+        replyToHandle: replyingTo?.handle,
+      };
+
+      setComments((prev) => [...prev, newComment]);
+      
+      // Update post comment count if replying to post
+      if (replyingTo?.isPost) {
+        // In real app, update post comment count via API
+      }
+
       setReplyText('');
+      setReplyingTo(null);
+      Keyboard.dismiss();
+      
+      // Scroll to show new comment
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
     }
+  };
+
+  const handleCancelReply = () => {
+    setReplyingTo(null);
+    setReplyText('');
+    Keyboard.dismiss();
   };
 
   return (
@@ -81,7 +147,11 @@ export default function PostDetailScreen() {
           <Ionicons name="ellipsis-horizontal" size={20} color={Colors.text} />
         </TouchableOpacity>
       </View>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        ref={scrollViewRef}
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.post}>
           <View style={styles.postHeader}>
             <TouchableOpacity
@@ -118,9 +188,7 @@ export default function PostDetailScreen() {
           <Text style={styles.timestamp}>{post.timestamp}</Text>
           <PostActions
             post={post}
-            onComment={() => {
-              // Focus on reply input
-            }}
+            onComment={handleCommentOnPost}
             onRepost={() => {
               // Handle repost
             }}
@@ -173,7 +241,18 @@ export default function PostDetailScreen() {
                   </TouchableOpacity>
                 </View>
                 <Text style={styles.commentText}>{comment.text}</Text>
-                <TouchableOpacity style={styles.replyButton}>
+                {comment.replyToId && comment.replyToName && (
+                  <View style={styles.replyToIndicator}>
+                    <Ionicons name="arrow-undo" size={12} color={Colors.textLight} />
+                    <Text style={styles.replyToText}>
+                      Replying to {comment.replyToName} {comment.replyToHandle}
+                    </Text>
+                  </View>
+                )}
+                <TouchableOpacity 
+                  style={styles.replyButton}
+                  onPress={() => handleCommentOnComment(comment)}
+                >
                   <Text style={styles.replyText}>Reply</Text>
                 </TouchableOpacity>
                 <PostActions
@@ -191,9 +270,7 @@ export default function PostDetailScreen() {
                   isComment={true}
                   postId={post.id}
                   postTitle={post.text.substring(0, 50) + (post.text.length > 50 ? '...' : '')}
-                  onComment={() => {
-                    // Handle reply to comment
-                  }}
+                  onComment={() => handleCommentOnComment(comment)}
                   onRepost={() => {
                     // Handle repost comment
                   }}
@@ -208,14 +285,30 @@ export default function PostDetailScreen() {
         </View>
       </ScrollView>
 
+      {replyingTo && (
+        <View style={styles.replyPreviewBar}>
+          <View style={styles.replyPreviewContent}>
+            <Ionicons name="arrow-undo" size={16} color={Colors.primary} />
+            <Text style={styles.replyPreviewText}>
+              Replying to {replyingTo.name} {replyingTo.handle}
+            </Text>
+          </View>
+          <TouchableOpacity onPress={handleCancelReply}>
+            <Ionicons name="close" size={20} color={Colors.textLight} />
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.replyBar}>
         <TextInput
+          ref={replyInputRef}
           style={styles.replyInput}
-          placeholder="Post your reply"
+          placeholder={replyingTo ? `Reply to ${replyingTo.name}...` : "Post your reply"}
           placeholderTextColor={Colors.textLight}
           value={replyText}
           onChangeText={setReplyText}
           multiline
+          maxLength={280}
         />
         <Text style={styles.characterCount}>{replyText.length}/280</Text>
         <TouchableOpacity
@@ -351,11 +444,45 @@ const styles = StyleSheet.create({
     color: Colors.text,
     lineHeight: 24,
     marginBottom: 8,
+    marginLeft: 52, // Align with name/username (avatar width 32 + marginRight 12 + some spacing)
   },
   replyButton: {
     marginBottom: 8,
   },
   replyText: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  replyToIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  replyToText: {
+    fontSize: 12,
+    color: Colors.textLight,
+    fontStyle: 'italic',
+  },
+  replyPreviewBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.primaryLight,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+  },
+  replyPreviewContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  replyPreviewText: {
     fontSize: 14,
     color: Colors.primary,
     fontWeight: '500',
