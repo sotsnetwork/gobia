@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import { Colors } from '../constants/colors';
@@ -19,6 +20,7 @@ export default function EditProfileScreen() {
   const [bio, setBio] = useState('Building with React Native & Firebase | Founder');
   const [location, setLocation] = useState('');
   const [website, setWebsite] = useState('');
+  const [avatarUri, setAvatarUri] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
 
   // Load saved profile (if any) so edits persist
@@ -32,6 +34,7 @@ export default function EditProfileScreen() {
           setBio(profile.bio || '');
           setLocation(profile.location || '');
           setWebsite(profile.website || '');
+          setAvatarUri(profile.avatarUri);
         }
       } catch (error) {
         // Fallback to defaults on error
@@ -40,6 +43,29 @@ export default function EditProfileScreen() {
 
     loadProfile();
   }, []);
+
+  const handlePickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant camera roll permissions to change your profile picture.');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setAvatarUri(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image. Please try again.');
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -68,6 +94,7 @@ export default function EditProfileScreen() {
         bio: bio.trim(),
         location: location.trim() || undefined,
         website: normalizedWebsite || undefined,
+        avatarUri: avatarUri || undefined,
       });
 
       Alert.alert('Success', 'Profile updated successfully!', [
@@ -99,8 +126,12 @@ export default function EditProfileScreen() {
       >
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
           <View style={styles.avatarSection}>
-            <View style={styles.avatar} />
-            <TouchableOpacity style={styles.changePhotoButton}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatar} />
+            )}
+            <TouchableOpacity style={styles.changePhotoButton} onPress={handlePickImage}>
               <Ionicons name="camera-outline" size={20} color={Colors.primary} />
               <Text style={styles.changePhotoText}>Change Photo</Text>
             </TouchableOpacity>
@@ -226,6 +257,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: Colors.primaryLight,
     marginBottom: 12,
+    resizeMode: 'cover',
   },
   changePhotoButton: {
     flexDirection: 'row',
