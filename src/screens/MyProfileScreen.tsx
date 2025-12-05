@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Share, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import PostActions from '../components/PostActions';
@@ -21,24 +21,34 @@ export default function MyProfileScreen() {
   const [location, setLocation] = useState<string | undefined>(undefined);
   const [website, setWebsite] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const profile = await ProfileService.getProfile();
-        if (profile) {
-          setName(profile.name || 'Jane Doe');
-          setUsername(profile.username || '@CoolApp');
-          setBio(profile.bio || '');
-          setLocation(profile.location);
-          setWebsite(profile.website);
-        }
-      } catch (error) {
-        // Keep defaults on error
+  const loadProfile = useCallback(async () => {
+    try {
+      const profile = await ProfileService.getProfile();
+      if (profile) {
+        setName(profile.name || 'Jane Doe');
+        setUsername(profile.username || '@CoolApp');
+        setBio(profile.bio || '');
+        setLocation(profile.location);
+        setWebsite(profile.website);
+      } else {
+        // Reset to defaults if no profile found
+        setName('Jane Doe');
+        setUsername('@CoolApp');
+        setBio('Building with React Native & Firebase | Founder');
+        setLocation(undefined);
+        setWebsite(undefined);
       }
-    };
-
-    loadProfile();
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      // Keep defaults on error
+    }
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProfile();
+    }, [loadProfile])
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
