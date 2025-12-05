@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/colors';
+import { RootStackParamList } from '../types/navigation';
 import * as BookmarkService from '../services/bookmarkService';
 import RepostQuoteModal from './RepostQuoteModal';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface PostActionsProps {
   post: {
