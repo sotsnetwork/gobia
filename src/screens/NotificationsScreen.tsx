@@ -14,10 +14,12 @@ interface Notification {
   type: 'like' | 'comment' | 'follow' | 'mention' | 'community';
   user: string;
   userHandle: string;
+  userId?: string;
   message: string;
   time: string;
   read: boolean;
   postId?: string;
+  communityId?: string;
 }
 
 const sampleNotifications: Notification[] = [
@@ -26,6 +28,7 @@ const sampleNotifications: Notification[] = [
     type: 'like',
     user: 'Sarah Johnson',
     userHandle: '@sarahj',
+    userId: 'sarahj',
     message: 'liked your post',
     time: '2m',
     read: false,
@@ -36,6 +39,7 @@ const sampleNotifications: Notification[] = [
     type: 'comment',
     user: 'Mike Davis',
     userHandle: '@miked',
+    userId: 'miked',
     message: 'commented on your post',
     time: '15m',
     read: false,
@@ -46,6 +50,7 @@ const sampleNotifications: Notification[] = [
     type: 'follow',
     user: 'Elena Martinez',
     userHandle: '@elena_dev',
+    userId: 'elena_dev',
     message: 'started following you',
     time: '1h',
     read: true,
@@ -55,6 +60,7 @@ const sampleNotifications: Notification[] = [
     type: 'mention',
     user: 'Builder Bro',
     userHandle: '@builderbro',
+    userId: 'builderbro',
     message: 'mentioned you in a post',
     time: '2h',
     read: true,
@@ -65,10 +71,12 @@ const sampleNotifications: Notification[] = [
     type: 'community',
     user: 'React Native Devs',
     userHandle: '@reactnative_devs',
+    userId: 'reactnative_devs',
     message: 'New post in React Native Developers',
     time: '3h',
     read: true,
     postId: '4',
+    communityId: 'reactnative',
   },
 ];
 
@@ -109,14 +117,36 @@ const getNotificationColor = (type: Notification['type']) => {
 export default function NotificationsScreen() {
   const navigation = useNavigation<NavigationProp>();
 
+  const handleNotificationPress = (notification: Notification) => {
+    if (notification.type === 'follow') {
+      // Navigate to user profile
+      navigation.navigate('UserProfile', {
+        userId: notification.userId || notification.userHandle.replace('@', ''),
+        username: notification.userHandle,
+      });
+    } else if (notification.type === 'community' && notification.communityId) {
+      // Navigate to community
+      navigation.navigate('CommunityDetail', {
+        communityId: notification.communityId,
+        communityName: notification.user,
+      });
+    } else if (notification.postId) {
+      // Navigate to post detail
+      navigation.navigate('PostDetail', { postId: notification.postId });
+    } else if (notification.userId) {
+      // Fallback to user profile
+      navigation.navigate('UserProfile', {
+        userId: notification.userId,
+        username: notification.userHandle,
+      });
+    }
+  };
+
   const NotificationItem = ({ notification }: { notification: Notification }) => (
     <TouchableOpacity
       style={[styles.notificationItem, !notification.read && styles.unreadNotification]}
-      onPress={() => {
-        if (notification.postId) {
-          navigation.navigate('PostDetail', { postId: notification.postId });
-        }
-      }}
+      onPress={() => handleNotificationPress(notification)}
+      activeOpacity={0.7}
     >
       <View style={[styles.iconContainer, { backgroundColor: getNotificationColor(notification.type) + '20' }]}>
         <Ionicons
@@ -139,7 +169,7 @@ export default function NotificationsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Notifications</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('NotificationSettings')}>
           <Ionicons name="settings-outline" size={24} color={Colors.text} />
         </TouchableOpacity>
       </View>
