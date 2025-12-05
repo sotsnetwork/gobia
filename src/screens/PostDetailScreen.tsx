@@ -6,8 +6,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import PostActions from '../components/PostActions';
+import Avatar from '../components/Avatar';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import { useUserAvatar } from '../hooks/useUserAvatar';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RoutePropType = RouteProp<RootStackParamList, 'PostDetail'>;
@@ -30,6 +32,7 @@ interface Comment {
 export default function PostDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RoutePropType>();
+  const userAvatar = useUserAvatar();
   const replyInputRef = useRef<TextInput>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -161,7 +164,10 @@ export default function PostDetailScreen() {
               }}
               activeOpacity={0.7}
             >
-              <View style={styles.avatar} />
+              <Avatar 
+                uri={(post.handle === '@you' || post.name === 'You') ? userAvatar : undefined} 
+                size={40} 
+              />
             </TouchableOpacity>
             <View style={styles.postUserInfo}>
               <TouchableOpacity
@@ -212,7 +218,10 @@ export default function PostDetailScreen() {
                 }}
                 activeOpacity={0.7}
               >
-                <View style={styles.commentAvatar} />
+                <Avatar 
+                  uri={(comment.handle === '@you' || comment.name === 'You') ? userAvatar : undefined} 
+                  size={32} 
+                />
               </TouchableOpacity>
               <View style={styles.commentContent}>
                 <View style={styles.commentHeader}>
