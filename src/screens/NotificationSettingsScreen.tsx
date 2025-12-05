@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { Colors } from '../constants/colors';
 import { RootStackParamList } from '../types/navigation';
+import * as SettingsService from '../services/settingsService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -22,17 +23,37 @@ export default function NotificationSettingsScreen() {
   const [communityPosts, setCommunityPosts] = useState(true);
   const [collaborations, setCollaborations] = useState(true);
 
-  const handleNotificationChange = (
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    try {
+      const settings = await SettingsService.getSettings();
+      setLikes(settings.notifications.likes);
+      setComments(settings.notifications.comments);
+      setMentions(settings.notifications.mentions);
+      setFollows(settings.notifications.follows);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const handleNotificationChange = async (
     setter: (value: boolean) => void,
     value: boolean,
-    settingName: string
+    settingName: string,
+    settingKey?: keyof SettingsService.AppSettings['notifications']
   ) => {
     setter(value);
-    // Simulate API call
-    setTimeout(() => {
-      // Show brief feedback (could use a toast library in production)
-      // For now, we'll just update the state which provides visual feedback
-    }, 100);
+    if (settingKey) {
+      try {
+        await SettingsService.updateNotificationSettings({ [settingKey]: value });
+      } catch (error) {
+        console.error('Error saving notification setting:', error);
+        setter(!value); // Revert on error
+      }
+    }
   };
 
   const SettingItem = ({
@@ -91,28 +112,28 @@ export default function NotificationSettingsScreen() {
             title="Likes"
             subtitle="When someone likes your post"
             value={likes}
-            onValueChange={(value) => handleNotificationChange(setLikes, value, 'Likes')}
+            onValueChange={(value) => handleNotificationChange(setLikes, value, 'Likes', 'likes')}
           />
           <SettingItem
             icon="chatbubble-outline"
             title="Comments"
             subtitle="When someone comments on your post"
             value={comments}
-            onValueChange={(value) => handleNotificationChange(setComments, value, 'Comments')}
+            onValueChange={(value) => handleNotificationChange(setComments, value, 'Comments', 'comments')}
           />
           <SettingItem
             icon="at-outline"
             title="Mentions"
             subtitle="When someone mentions you"
             value={mentions}
-            onValueChange={(value) => handleNotificationChange(setMentions, value, 'Mentions')}
+            onValueChange={(value) => handleNotificationChange(setMentions, value, 'Mentions', 'mentions')}
           />
           <SettingItem
             icon="person-add-outline"
             title="New Followers"
             subtitle="When someone follows you"
             value={follows}
-            onValueChange={(value) => handleNotificationChange(setFollows, value, 'New Followers')}
+            onValueChange={(value) => handleNotificationChange(setFollows, value, 'New Followers', 'follows')}
           />
           <SettingItem
             icon="mail-outline"
