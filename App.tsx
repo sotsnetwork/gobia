@@ -22,6 +22,7 @@ import MainTabNavigator from './src/navigators/MainTabNavigator';
 import PostDetailScreen from './src/screens/PostDetailScreen';
 import CreatePostScreen from './src/screens/CreatePostScreen';
 import QuotePostScreen from './src/screens/QuotePostScreen';
+import PostAnalyticsScreen from './src/screens/PostAnalyticsScreen';
 
 // Profile Screens
 import MyProfileScreen from './src/screens/MyProfileScreen';
@@ -241,6 +242,17 @@ export default function App() {
                 animationDuration: 400,
                 gestureEnabled: true,
                 gestureDirection: 'vertical',
+                fullScreenGestureEnabled: Platform.OS === 'ios',
+              }}
+            />
+            <Stack.Screen 
+              name="PostAnalytics" 
+              component={PostAnalyticsScreen}
+              options={{
+                animation: 'slide_from_right',
+                animationDuration: 400,
+                gestureEnabled: true,
+                gestureDirection: 'horizontal',
                 fullScreenGestureEnabled: Platform.OS === 'ios',
               }}
             />
