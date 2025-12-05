@@ -10,8 +10,9 @@ export type RootStackParamList = {
   
   // Detail Screens
   PostDetail: { postId?: string; post?: any };
-  CreatePost: undefined;
+  CreatePost: { draft?: any };
   QuotePost: { post?: any; reply?: any };
+  PostAnalytics: { post?: any };
   
   // Profile
   MyProfile: undefined;
